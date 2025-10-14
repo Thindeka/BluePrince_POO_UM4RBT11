@@ -1,0 +1,7 @@
+Etapes / tâches à effectuer :
+
+I. Squelette du jeu :
+- Classe du personnage, objet
+- Définir les comportements du personnage (actions, interaction)
+
+II. Partie graphique
