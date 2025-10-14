@@ -1,0 +1,14 @@
+Algorithme établit :
+
+Début du jeu :
+Start ----> case entrée GRILLE 
+
+Tour x :
+---> 1. Vérification du système (inventaire du joueur,...)
+|    2. Déplacement (mur, porte déjà ouverte, nouvelle porte) ----> Consommable : pas
+|    3. Ouverture d'une porte (STATUT DE LA PORTE) ----> (action) Objet : clé, kit de crochetage 
+|    4. Tirage d'une pièce (dépend de leur DEGRÉ DE RARETÉ) ----> objet : PATTE DE LAPIN, DÉ,... / ----> Effet de pièce (n-1)
+|----5. Action dans la pièce (OBJETS DISPONIBLES, type de pièce) ----> objet à utiliser/ à récuperer
+
+Fin du jeu : 
+End ----> case sortie Antichambre 
