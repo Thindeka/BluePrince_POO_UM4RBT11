@@ -5,3 +5,14 @@ I. Squelette du jeu :
 - Définir les comportements du personnage (actions, interaction)
 
 II. Partie graphique
+
+
+
+Thindeka -> ecrire types dans classes ()
+        -> deplacement 2.5
+        -> porte
+Jihen -> Fichier AutresObjets - classe Coffre + classe Casier + classe Endroits_creuser: ajouter nommbre de objets max dans coffre (nb random entre x et y) pour contraindre nombre d objets consommables dans le coffre (autres objets)
+        (ajouter attribuit nb_objets (Qui est random entre x et y))
+        -> 2.8
+
+Cyril -> Piece (2.3, 2.4, 2.7)

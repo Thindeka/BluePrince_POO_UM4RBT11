@@ -1,3 +1,14 @@
+import random
+from src.Inventaire import Inventaire
+
+
+class AutresObjets :
+    nom : str = "autre_obj"  # attribut de classe, valeur par défaut
+
+    def appliquer (self, inv : Inventaire) :  
+        raise NotImplementedError
+
+
 class Pomme(AutresObjets):
     """ Redonne 2 pas """
     nom = "pomme"
@@ -33,7 +44,7 @@ class Repas(AutresObjets):
     def appliquer(self, inv):
         inv.ramasser_pas(25)  # Le joueur gagne 25 pas
 
-class Coffre:
+class Coffre :
     """Coffre qu'on peut ouvrir avec une clé ou un marteau."""
     
     def __init__(self, contenu_possibles=None):
@@ -52,11 +63,12 @@ class Coffre:
 
 
 class Casier:
+    ####### implememnter fait que juste contenu dans piece vestiaire
     """Casier qu'on peut ouvrir uniquement avec une clé."""
     
     def __init__(self, contenu_possibles=None):
         if contenu_possibles is None:
-            contenu_possibles = [None, Pomme(), Gateau(), Repas()]
+            contenu_possibles = [None, Pomme(), Gateau(), Repas(), Sandwich(), Banane()]
         self.contenu_possibles = contenu_possibles
 
     def ouvrir(self, inv):

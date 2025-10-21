@@ -7,7 +7,7 @@ class Joueur:
     
     def __init__(self):
         self.inventaire = Inventaire()
-        self.position = (0, 0)  # Position initiale dans la grille (peut être modifiée selon le jeu)
+        self.position = (0, 0)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
     
     def deplacer(self, direction, grille):
         """ Déplace le joueur dans la direction donnée et met à jour son inventaire """

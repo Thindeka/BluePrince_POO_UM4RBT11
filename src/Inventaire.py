@@ -56,8 +56,10 @@ class Inventaire :
     
     # on stocke les instances des objets permanents 
     objets_permanents : List[ObjetPermanent] = field(default_factory=list)
-    
 
+
+    ####### AUTRES OBJETS
+    ### faire pareil   THINDEKA
 
 
     def utiliser_pas (self, n=1) -> None :
@@ -75,6 +77,8 @@ class Inventaire :
         """
         self.pas = max(0, self.pas - max(0,n))
 
+    def ramasser_pas(self, n) :
+        self.pas += max(0,n)   # on évite le comportement indésirables de faire un ajout avec un nombre négatif
 
 
     def ramasser_pieceOr (self, n) -> None :
