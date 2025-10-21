@@ -1,32 +1,32 @@
-class Pomme(ObjetConsommable):
+class Pomme(AutresObjets):
     """ Redonne 2 pas """
     nom = "pomme"
 
     def appliquer(self, inv):
         inv.ramasser_pas(2)  
 
-class Banane(ObjetConsommable):
+class Banane(AutresObjets):
     """ Redonne 3 pas """
     nom = "banane"
 
     def appliquer(self, inv):
         inv.ramasser_pas(3)  
 
-class Gateau(ObjetConsommable):
+class Gateau(AutresObjets):
     """ Redonne 10 pas """
     nom = "gateau"
 
     def appliquer(self, inv):
         inv.ramasser_pas(10)  
 
-class Sandwich(ObjetConsommable):
+class Sandwich(AutresObjets):
     """ Redonne 15 pas """
     nom = "sandwich"
 
     def appliquer(self, inv):
         inv.ramasser_pas(15)  # Le joueur gagne 15 pas
 
-class Repas(ObjetConsommable):
+class Repas(AutresObjets):
     """ Redonne 25 pas """
     nom = "repas"
 
