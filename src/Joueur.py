@@ -1,3 +1,7 @@
+from src.Inventaire import Inventaire
+
+DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
+
 class Joueur:
     """ Représente le joueur ou la joueuse """
     

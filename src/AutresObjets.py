@@ -1,5 +1,3 @@
-from src.ObjetConsommable import ObjetConsommable 
-
 class Pomme(ObjetConsommable):
     """ Redonne 2 pas """
     nom = "pomme"
