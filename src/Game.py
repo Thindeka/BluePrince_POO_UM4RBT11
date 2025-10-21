@@ -3,8 +3,19 @@ from src.Joueur import Joueur
 # from src.Piece import Piece
 from src.AutresObjets import Pomme, Banane, Gateau, Sandwich, Repas
 
-class Game:
+class Game:  # a modifier 
+    """
+    Représente la logique principale du jeu.
 
+    Attributs
+    ----------
+    grille : Grille
+        Grille de jeu contenant les cases et les obstacles.
+    joueur : Joueur
+        Instance du joueur ou de la joueuse.
+    position_joueur : tuple(int, int)
+        Coordonnées (x, y) du joueur sur la grille.
+    """
     def __init__(self):
         self.grille = Grille()
         self.joueur = Joueur()
@@ -12,7 +23,19 @@ class Game:
         # self.objets_choisis = {}  on l a deja dans Joueur (inventaire)
 
     def deplacer_joueur(self, direction: str) -> str:
-        """Déplace le joueur si possible"""
+        """
+        Déplace le joueur dans la direction indiquée si le déplacement est possible.
+
+        Paramètres
+        ----------
+        direction : str
+            Direction du déplacement ('N', 'S', 'E' ou 'O').
+
+        Returns
+        -------
+        str
+            Message indiquant le résultat du déplacement.
+        """
         x, y = self.position_joueur
         if direction not in ["N", "S", "E", "O"]:
             return "Direction invalide"

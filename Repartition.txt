@@ -4,9 +4,15 @@ I. Squelette du jeu :
 - Classe du personnage, objet
 - Définir les comportements du personnage (actions, interaction)
 
-II. Partie graphique
+REUNION :
+
+Thindeka -> Classe Grille, Inventaire et ObjetsPermanents
+Jihen -> classe Joueur, AutresObjets et Game
+
+Cyril -> Classe Porte et Pièce 
 
 
+REUNION :
 
 Thindeka -> ecrire types dans classes ()
         -> deplacement 2.5
@@ -16,3 +22,22 @@ Jihen -> Fichier AutresObjets - classe Coffre + classe Casier + classe Endroits_
         -> 2.8
 
 Cyril -> Piece (2.3, 2.4, 2.7)
+
+
+Rappel cours > utiliser la convention python :
+
+"""
+Description
+
+Paramètres
+----------
+nom : type
+    description du paramètre
+
+Returns
+-------
+type
+    description du retour
+"""
+
+II. Partie graphique

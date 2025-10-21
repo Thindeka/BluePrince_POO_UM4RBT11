@@ -3,6 +3,14 @@ from src.Inventaire import Inventaire
 
 
 class AutresObjets :
+    """
+    Classe de base pour tous les objets utilisables dans le jeu.
+
+    Attributs de classe
+    -------------------
+    nom : str
+        Nom de l’objet (valeur par défaut : "autre_obj").
+    """
     nom : str = "autre_obj"  # attribut de classe, valeur par défaut
 
     def appliquer (self, inv : Inventaire) :  
@@ -14,6 +22,18 @@ class Pomme(AutresObjets):
     nom = "pomme"
 
     def appliquer(self, inv):
+        """
+        Ajoute 2 pas à l’inventaire du joueur.
+
+        Paramètres
+        ----------
+        inv : Inventaire
+            Inventaire du joueur.
+
+        Returns
+        -------
+        None
+        """
         inv.ramasser_pas(2)  
 
 class Banane(AutresObjets):
@@ -21,6 +41,18 @@ class Banane(AutresObjets):
     nom = "banane"
 
     def appliquer(self, inv):
+        """
+        Ajoute 3 pas à l’inventaire du joueur.
+
+        Paramètres
+        ----------
+        inv : Inventaire
+            Inventaire du joueur.
+
+        Returns
+        -------
+        None
+        """
         inv.ramasser_pas(3)  
 
 class Gateau(AutresObjets):
@@ -28,6 +60,18 @@ class Gateau(AutresObjets):
     nom = "gateau"
 
     def appliquer(self, inv):
+        """
+        Ajoute 10 pas à l’inventaire du joueur.
+
+        Paramètres
+        ----------
+        inv : Inventaire
+            Inventaire du joueur.
+
+        Returns
+        -------
+        None
+        """
         inv.ramasser_pas(10)  
 
 class Sandwich(AutresObjets):
@@ -35,6 +79,18 @@ class Sandwich(AutresObjets):
     nom = "sandwich"
 
     def appliquer(self, inv):
+        """
+        Ajoute 15 pas à l’inventaire du joueur.
+
+        Paramètres
+        ----------
+        inv : Inventaire
+            Inventaire du joueur.
+
+        Returns
+        -------
+        None
+        """
         inv.ramasser_pas(15)  # Le joueur gagne 15 pas
 
 class Repas(AutresObjets):
@@ -42,6 +98,18 @@ class Repas(AutresObjets):
     nom = "repas"
 
     def appliquer(self, inv):
+        """
+        Ajoute 25 pas à l’inventaire du joueur.
+
+        Paramètres
+        ----------
+        inv : Inventaire
+            Inventaire du joueur.
+
+        Returns
+        -------
+        None
+        """
         inv.ramasser_pas(25)  # Le joueur gagne 25 pas
 
 class Coffre :
