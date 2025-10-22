@@ -6,9 +6,6 @@ class Piece :
     nom : str
         nom de la pièce
 
-    image : 
-        chaque pièce est associée à une image
-
     portes  :
         ménent vers des directions différentes. >= 1 (au min 1 : porte par laquelle la pièce a été ouverte)
         
@@ -34,28 +31,49 @@ class Piece :
         quand une pièce est ajoutée au manoir, elle est retirée de la "pioche" et ne peut plus être tirée 
         (sauf si elle et en plusieurs exemplaires) -> définir nb exemplaire de chaque pièce
     """
-    nom : str = "piece"
 
-    def appliquer (self, inv : Pioche) :  
-        raise NotImplementedError
+    def __init__(self, rarete, cout, porte):
+        """interaction, rareté, coût, porte ()"""
+        self._rarete = rarete
+        self.cout = cout
+        self.porte = porte
+    
+    
+    nom : str = "piece"
 
     class Jaunes(Piece):
         """type de pièce : magasin"""
-        def Commissary(Piece):
-            nom = "Commissary"
+        
+        def __init__(self):
+            super().__init__()
+            """capacité d'acheter"""
+    
+        def Commissariat(self):
+            nom = "Commissariat"
             """Autres objets à vendre"""
-        def Kitchen(piece):
-            nom = "Kitchen"
+        def Cuisine(piece):
+            nom = "Cuisine"
             """Nouriture à vendre"""
-        def Kitchen(piece):
-            nom = "Kitchen"
-            """Nouriture à vendre"""
-        def Kitchen(piece):
-            nom = "Kitchen"
-        """Nouriture à vendre"""
-        def Kitchen(piece):
-            nom = "Kitchen"
-        """Nouriture à vendre"""
+        def Serrurier(piece):
+            nom = "Serrurier"
+            """clés à vendre"""
+        def Salle_Exposition(piece):
+            nom = "Salle_Exposition"
+            """produit de luxe à vendre"""
+
+        def Buanderie(piece):
+            nom = "Buanderie"
+            """blanchir de l'argent"""
+
+        def Librairie(piece):
+            nom = "Librairie"
+            """livres à vendre"""
+
+        def Armurerie(piece):
+            nom = "Armurerie"
+            """blanchir de l'argent"""
+
+            
 
     class vertes(Piece):
         """jardins d'intérieur"""
