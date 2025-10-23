@@ -9,7 +9,7 @@ class AutresObjets :
     Attributs de classe
     -------------------
     nom : str
-        Nom de l’objet (valeur par défaut : "autre_obj").
+        Nom de l'objet (valeur par défaut : "autre_obj").
     """
     nom : str = "autre_obj"  # attribut de classe, valeur par défaut
 
