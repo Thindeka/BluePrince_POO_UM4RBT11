@@ -54,7 +54,8 @@ class Piece :
         pieces = [random.choice(self._pieces_disponibles) for i in range(3)] 
         print("choisi une pièce où te diriger")
     
-    
+    def appliquer (self, inv : Inventaire) :  
+        raise NotImplementedError
 
 class Jaunes(Piece):
     """type de pièce : magasin"""
@@ -66,7 +67,7 @@ class Jaunes(Piece):
         nom = "Commissariat"
         self._rarete = 1
         self._cout = 1
-        self._porte = 2
+        self._porte = 2 ### faut-il indiquer l'orientation de la porte (gauche, droite etc..) ? Doit faire référence à la classe grille ?
         self._pieces_disponibles = self._pieces_disponibles - nom # à modifier mais c'est l'idée
         
         def achat(self, inv):
@@ -83,16 +84,23 @@ class Jaunes(Piece):
                 Message indiquant l'achat du joueur.
             """
             ###### mauvais acces pour les objets permanents, un joueur a un inventaire, cet inventaire contient une liste d objets permanents (a coder) 
-            articles_disponibles = {Inventaire.gemmes: 3, ObjetPermanent.Pelle: 6, ObjetPermanent.Marteau: 8, ObjetPermanent.DetecteurMetaux: 10, 4*Inventaire.gemmes: 10, Inventaire.cles: 10}
-            objet = [random.choice(self.articles_disponibles) for i in range(4)]
+            ### vérifier inventaire 
+            articles = {Inventaire.gemmes: 3, ObjetPermanent.Pelle: 6, ObjetPermanent.Marteau: 8, ObjetPermanent.DetecteurMetaux: 10, 4*Inventaire.gemmes: 10, Inventaire.cles: 10}
+            articles_update = articles.copy()
+            for nom in articles_update.keys():
+                if Inventaire.possede_obj_permanent(nom) == True :
+                    del articles_update[nom]
+            articles_disponibles = [random.choice(articles_update) for i in range(4)]
+            objet = # renvoie "objet" choisi
             ### en fonction du choix du joueur, débiter de son inventaire le montant en pièces d'or
-            if inv.depenser_pieceOr():
-                objet.appliquer(inv)
+            if Inventaire.depenser_pieceOr(articles_disponibles[objet]):
+                Inventaire.ajouter_obj_permanent(objet)
                 return f" Vous avez acheté : {objet.nom}"
 
     def Cuisine(self):
         nom = "Cuisine"
         """Nouriture à vendre"""
+        
 
     def Serrurier(self):
         nom = "Serrurier"
