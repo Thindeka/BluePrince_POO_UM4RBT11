@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import List, Set
 
 from src.ObjetPermanent import ObjetPermanent
+from src.AutreObjet import AutreObjet
 
 
 
@@ -59,7 +60,12 @@ class Inventaire :
 
 
     ####### AUTRES OBJETS
-    ### faire pareil   THINDEKA
+
+    # noms des autres objets
+    noms_autres_objets : Set[str] = field(default_factory=set)
+
+    # instances des autres objets  
+    autres_objets : List[AutreObjet] = field(default_factory=list)
 
 
     def utiliser_pas (self, n=1) -> None :

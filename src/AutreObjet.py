@@ -2,7 +2,7 @@ import random
 from src.Inventaire import Inventaire
 
 
-class AutresObjets :
+class AutreObjet :
     """
     Classe de base pour tous les objets utilisables dans le jeu.
 
@@ -17,7 +17,7 @@ class AutresObjets :
         raise NotImplementedError
 
 
-class Pomme(AutresObjets):
+class Pomme(AutreObjet):
     """ Redonne 2 pas """
     nom = "pomme"
 
@@ -36,7 +36,7 @@ class Pomme(AutresObjets):
         """
         inv.ramasser_pas(2)  
 
-class Banane(AutresObjets):
+class Banane(AutreObjet):
     """ Redonne 3 pas """
     nom = "banane"
 
@@ -55,7 +55,7 @@ class Banane(AutresObjets):
         """
         inv.ramasser_pas(3)  
 
-class Gateau(AutresObjets):
+class Gateau(AutreObjet):
     """ Redonne 10 pas """
     nom = "gateau"
 
@@ -74,7 +74,7 @@ class Gateau(AutresObjets):
         """
         inv.ramasser_pas(10)  
 
-class Sandwich(AutresObjets):
+class Sandwich(AutreObjet):
     """ Redonne 15 pas """
     nom = "sandwich"
 
@@ -93,7 +93,7 @@ class Sandwich(AutresObjets):
         """
         inv.ramasser_pas(15)  # Le joueur gagne 15 pas
 
-class Repas(AutresObjets):
+class Repas(AutreObjet):
     """ Redonne 25 pas """
     nom = "repas"
 

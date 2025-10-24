@@ -1,5 +1,5 @@
 import random
-from src.AutresObjets import AutresObjets
+from src.AutreObjet import AutresObjets
 from src.Inventaire import Inventaire
 from src.ObjetPermanent import ObjetPermanent
 

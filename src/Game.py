@@ -1,7 +1,7 @@
 from src.Grille import Grille
 from src.Joueur import Joueur
 # from src.Piece import Piece
-from src.AutresObjets import Pomme, Banane, Gateau, Sandwich, Repas
+from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas
 
 class Game:  # a modifier 
     """

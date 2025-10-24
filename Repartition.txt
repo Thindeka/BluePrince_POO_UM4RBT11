@@ -17,6 +17,7 @@ REUNION :
 Thindeka -> ecrire types dans classes ()
         -> deplacement 2.5
         -> porte
+        -> revoir implementation 2.5 (fichier grille)
 Jihen -> Fichier AutresObjets - classe Coffre + classe Casier + classe Endroits_creuser: ajouter nommbre de objets max dans coffre (nb random entre x et y) pour contraindre nombre d objets consommables dans le coffre (autres objets)
         (ajouter attribuit nb_objets (Qui est random entre x et y))
         -> 2.8
@@ -45,3 +46,7 @@ II. Partie graphique
 
 ATTENTION :  NE JAMAIS METTRE D'ACCENTS DANS LES NOMS DE VARIABLES/CODE EN GÉNÉRAL
              NE PAS METTRE DE MAJUSCULE AU DEBUT D UN ATTRIBUT (SAUF SII TOUT ECRIT EN MAJUSCULE)
+
+
+
+
