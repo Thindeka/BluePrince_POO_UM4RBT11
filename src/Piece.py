@@ -1,5 +1,5 @@
 import random
-from src.AutreObjet import AutresObjets
+from src.AutreObjet import AutreObjet
 from src.Inventaire import Inventaire
 from src.ObjetPermanent import ObjetPermanent
 
@@ -40,7 +40,10 @@ class Piece :
         self._rarete = rarete
         self._cout = cout
         self._porte = porte
-        self._pieces_disponibles = [] # définir les pièces disponibles dans le manoir]
+        ### à quel moment définir les pièces disponibles et leur probabilité de tirage ?
+        self._pieces_disponibles = [] ### définir les pièces disponibles dans le manoir
+        # Chaque incrément du niveau de rareté doit diviser par trois la probabilité de tirer la pièce.
+        self.probability_distribution = [] ### définir la distribution de probabilité en fonction de la rareté des pièces
         nom : str = "piece"   ### nom est un attribut donc il va à l'intérieur du constructeur
         """Comment définir l'orientation d'une pièce et donc son nombre de portes"""
         """récupérer placement du joueur : condition de placement"""
@@ -50,9 +53,18 @@ class Piece :
     def random_tirage(self):
         """Tirage aléatoire de pièces
         Doit vérifier la rareté, le coût en gemmes (au moins 1 pièce = 0) et la condition de placement
+        Rareté : créer une liste des pièces disponibles et l'autre ses probzabilités
+        Cout en gemme : créer 2 listes, une : des pièces coutant des gemmes (dont on tirera 2 pièces) 
+        et l'autre n'en coutant pas (dont on en tirera 1 pièce)
         """
-        pieces = [random.choice(self._pieces_disponibles) for i in range(3)] 
+        #pieces = [random.choice(self._pieces_disponibles) for i in range(3)]
+        pieces = random.choice(self._pieces_disponibles, 3, p=self.probability_distribution)
         print("choisi une pièce où te diriger")
+
+    def choisir_piece(self):
+        """Le joueur choisit une pièce parmi les 3 tirées aléatoirement"""
+        piece = [] ### à modifier : choix du joueur parmi les 3 pièces, renvoie vers la fonction correspondante
+        del self._pieces_disponibles[piece] # supprimer la pièce de la pioche une fois utilisée
     
     def appliquer (self, inv : Inventaire) :  
         raise NotImplementedError
@@ -63,35 +75,33 @@ class Jaunes(Piece):
     def __init__(self):
         super().__init__()  ### il manque les paramètres du constructeur
 
+
     def Commissariat(self):
         nom = "Commissariat"
         self._rarete = 1
         self._cout = 1
         self._porte = 2 ### faut-il indiquer l'orientation de la porte (gauche, droite etc..) ? Doit faire référence à la classe grille ?
-        self._pieces_disponibles = self._pieces_disponibles - nom # à modifier mais c'est l'idée
         
-        def achat(self, inv):
+        def achat_ObjetPermanent(self):
             #### définir Pelle, Marteau, DetecteurMetaux comme attributs de classe dans ObjetPermanent
             """Permet d'acheter si le joueur possède des pièces d'or.
             Paramètres
             ----------
-            inv : str
-                Inventaire du joueur.
-
+        
             Returns
             -------
             str
                 Message indiquant l'achat du joueur.
             """
             ###### mauvais acces pour les objets permanents, un joueur a un inventaire, cet inventaire contient une liste d objets permanents (a coder) 
-            ### vérifier inventaire 
-            articles = {Inventaire.gemmes: 3, ObjetPermanent.Pelle: 6, ObjetPermanent.Marteau: 8, ObjetPermanent.DetecteurMetaux: 10, 4*Inventaire.gemmes: 10, Inventaire.cles: 10}
+            ### vérifier inventaire (surtout le "4*Inventaire.gemmes")
+            articles = {Inventaire.gemmes: 3, Inventaire.Pelle: 6, Inventaire.Marteau: 8, Inventaire.DetecteurMetaux: 10, 4*Inventaire.gemmes: 10, Inventaire.cles: 10}
             articles_update = articles.copy()
             for nom in articles_update.keys():
                 if Inventaire.possede_obj_permanent(nom) == True :
                     del articles_update[nom]
             articles_disponibles = [random.choice(articles_update) for i in range(4)]
-            objet = # renvoie "objet" choisi
+            objet = [] # renvoie "objet" choisi
             ### en fonction du choix du joueur, débiter de son inventaire le montant en pièces d'or
             if Inventaire.depenser_pieceOr(articles_disponibles[objet]):
                 Inventaire.ajouter_obj_permanent(objet)
@@ -100,7 +110,32 @@ class Jaunes(Piece):
     def Cuisine(self):
         nom = "Cuisine"
         """Nouriture à vendre"""
+        self._rarete = 0
+        self._cout = 1
+        def achat_AutreObjet(self):
+            #### définir Pelle, Marteau, DetecteurMetaux comme attributs de classe dans ObjetPermanent
+            """Permet d'acheter si le joueur possède des pièces d'or.
+            Paramètres
+            ----------
+
+            Returns
+            -------
+            str
+                Message indiquant l'achat du joueur.
+            """
+            ###### mauvais acces pour les objets permanents, un joueur a un inventaire, cet inventaire contient une liste d objets permanents (a coder) 
+            ### vérifier inventaire 
+            articles_disponibles = {Inventaire.Banane: 2, Inventaire.Sandwich: 8}
+            objet = [] # renvoie "objet" choisi
+            ### en fonction du choix du joueur, débiter de son inventaire le montant en pièces d'or
+            if Inventaire.depenser_pieceOr(articles_disponibles[objet]):
+                Inventaire.autres_objets.append(objet) ### à vérifier ??
+                return f" Vous avez acheté : {objet.nom}"
         
+        def contenu_cuisine(self):
+            """Contenu possible de la cuisine"""
+            contenu_possibles = [None, Inventaire.clé, Inventaire.gemmes, 2*Inventaire.piecesOr, 3*Inventaire.piecesOr, 5*Inventaire.piecesOr]
+            return random.choice(contenu_possibles)
 
     def Serrurier(self):
         nom = "Serrurier"
