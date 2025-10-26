@@ -37,12 +37,6 @@ class Inventaire :
     cles : int = 0
     des : int  = 0 
 
-    ##### POUVOIRS 
-    peut_creuser : bool = False
-    peut_briser : bool = False
-    peut_ouvrir : bool = False
-
-    
     ##### AVANTAGES 
     chance_cles : float = 0.0
     chance_piecesOr : float = 0.0
@@ -128,7 +122,7 @@ class Inventaire :
             self.des -= 1
             return True
         return False
-    
+
 
  
     def ajouter_obj_permanent (self, obj_perm : ObjetPermanent) -> None :
@@ -146,3 +140,50 @@ class Inventaire :
         return True if nom in self.noms_objets_permanents else  False  # code redondant
     
 
+
+    #### OUVRIR PORTE
+    def peut_ouvrir_porte(self, niveau: int) -> bool:
+        return self.ouvrir_porte(niveau, dry_run=True)
+    
+
+    def ouvrir_porte (self, niveau : int, dry_run : bool = False) -> bool :   # dry_run pour l'UI
+        """ dry_run permet de pre-verifier action sans la comettre """
+        if niveau <= 0:
+            return True
+        if niveau == 1:
+            if self.cles > 0:
+                if not dry_run:
+                    self.cles -= 1
+                return True
+            if self.possede_obj_permanent("kit_de_crochetage"):
+                return True  
+            return False
+        if niveau == 2:
+            if self.cles > 0:
+                if not dry_run:
+                    self.cles -= 1
+                return True
+            return False
+        return False
+    
+
+    ####### CRUSER
+    def peut_creuser (self) -> bool :
+        return self.creuser(dry_run=True)
+    
+    def creuser (self, dry_run : bool = False) -> bool :
+        if self.possede_obj_permanent("pelle") :
+            return True 
+        return False
+    
+   
+    
+
+    ####### OUVRIR COFFRE
+    def peut_ouvrir_coffre (self) -> bool :
+        return self.ouvrir_coffre(dry_run=True)
+
+    def ouvrir_coffre(self, dry_run : bool = False) -> bool :
+        if self.possede_obj_permanent("marteau") :  # ouverture avec le marteau
+            return True
+        return (self.cles > 0) if dry_run else self.depenser_cles(1)

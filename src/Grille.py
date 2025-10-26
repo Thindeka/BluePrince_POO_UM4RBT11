@@ -7,7 +7,7 @@ from src.Inventaire import Inventaire
 
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
 DIRECTIONS_REVERSE = {(0,-1):"N",(0,1):"S",(1,0):"E",(-1,0):"O"}
-OPPOSE = {"N" : "S", "S" : "N", "E" : "W", "W" : "E"}
+OPPOSE = {"N" : "S", "S" : "N", "E" : "O", "O" : "E"}
 
 
 
@@ -19,8 +19,8 @@ class Grille :
     def __init__(self, largeur=5, hauteur=9) :
         self.__largeur = largeur
         self.__hauteur = hauteur
-        # self.__pieces = instnaciation objet classe Piece
-        self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}
+        self.__pieces = [[None for _ in range (self.__largeur)] for _ in range (self.__hauteur)]
+        self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
 
 
     @property
@@ -33,12 +33,10 @@ class Grille :
         """ getter de l'attribut __hauteur """
         return self.__hauteur
     
-    """
     @property
     def pieces (self) :
         return self.__pieces
-    """
-
+    
     @property
     def portes (self) :
         """ getter de l'attribut __portes """
@@ -49,14 +47,14 @@ class Grille :
 
     #### FOCNTIONS AUXILIAIRES
 
-    def deplacement_permis (self, x, y) -> bool :
+    def deplacement_permis (self, x : int, y : int) -> bool :
         """ 
         Retourne vrai si la case (x,y) est dans les bornes 
         """
         return 0 <= x < self.__largeur and 0 <= y < self.__hauteur
     
 
-    def dict_portes (self, x, y) -> Dict[str, Porte] :
+    def dict_portes (self, x : int, y : int) -> Dict[str, Porte] :
         """ 
         Retourne le dictionnaire des portes de la case (x,y)
         S'il n'est pas encore existant, le crée vide 
@@ -66,8 +64,8 @@ class Grille :
 
     def voisin (self, x : int, y : int, direction : str) -> Tuple[int, int] :
         """ Renvoie la case voisine dans la direction demandéee"""
-        delta_x, delta_y = DIRECTIONS[direction]
-        return x + delta_x, y + delta_y
+        dx, dy = DIRECTIONS[direction]
+        return x + dx, y + dy
        
 
     def niveau_porte(self, y : int) -> int :
@@ -89,10 +87,10 @@ class Grille :
         elif hauteur_norm < 0.66 :
             return 1
         else :
-            return 0
+            return 2
 
 
-    def garantie_porte (self, x, y, direction, niveau=None) -> Porte :
+    def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> Porte :
         """ Retourne la porte demandée (et son mirroir) en s'assurant qu'elle existe bien avant de l'utiliser
         Initialisation paresseuse
         """
@@ -103,73 +101,71 @@ class Grille :
 
         # 2) Gestion des bords de la grille
         if not self.deplacement_permis(new_x, new_y) :  # deplacement non permis
+            # retourne porte non franchissable
             return portes_case_courante.setdefault(direction, Porte(niveau=0, ouverte=False))
         
-        portes_case_new = self.dict_portes(new_x, new_y)
+        portes_case_vosin = self.dict_portes(new_x, new_y)
 
         # 3) Création de la porte (x,y) si non existante
         if direction not in portes_case_courante :   # la porte n'existe pas
             if niveau is None :
-               niveau = self.niveau_porte(min(y, new_y))
+                niveau = self.niveau_porte(min(y, new_y))
             portes_case_courante[direction] = Porte(niveau=niveau, ouverte=False)
             
         # 4) on fait de même du côté opposé
-        portes_case_new.setdefault(
-            OPPOSE[direction], 
-            Porte(niveau=portes_case_courante[direction].niveau, ouverte=portes_case_courante[direction].ouverte)
-        )
+        o = OPPOSE[direction] 
+        if o not in portes_case_vosin :
+            portes_case_vosin[o] = Porte(
+                niveau = portes_case_courante[direction].niveau, 
+                ouverte = portes_case_courante[direction].ouverte
+            )
 
         return portes_case_courante[direction]
 
 
 
-    def deplaceer_joueur (self, joueur : Joueur, inventaire : Inventaire, dx : int, dy : int) -> Tuple[bool, bool, int]:
+    #### GESTION DEPLACEMENT JOUEUR
+
+    def deplacer_joueur (self, joueur : Joueur, inventaire : Inventaire, dx : int, dy : int) -> Tuple[bool, bool, int] :
+        """"
+        RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int)"""
         
         # on récupere la valeur associée a la cle (dx,dy)
-        d = DIRECTIONS_REVERSE[(dx,dy)]
-        if d is None or (dx == 0 and dy == 0) :
+        d = DIRECTIONS_REVERSE.get((dx, dy))
+        if d is None or (dx == 0 and dy == 0) :   # Si (0,0) je ne fais rien
             return False, False, 0
 
-        x = joueur.position[0]
-        y = joueur.position[1]
+        x,y = joueur.position
+        new_x, new_y = self.voisin(x, y, d)
 
-        new_x, new_y = self.voisin(x, y, direction=d)
-
-        if not self.deplacement_permis(x, y) :
+        if not self.deplacement_permis(new_x, new_y) :   ### déplacement non permis (bords)
             return False, False, 0
 
-        # porte séparant (x,y) et (new_x, new)y
-        porte = self.garantie_porte(joueur.position[0], joueur.position[1], d)
+        # porte séparant (x,y) et (new_x, new)
+        porte = self.garantie_porte(x, y, d)
 
-        if not porte.ouverte :
-            niv = porte.niveau
-            porte_ouverte = False
-
-            if niv == 0 :  # on ouvre la porte
-                porte_ouverte = True 
-
-            elif niv == 1 :  # on essaye d'ouvrir la porte avec une cle ou le kit de crochetage
-
-                if inventaire.cles > 0 and inventaire.depenser_cles(1) :
-                    porte_ouverte = True
-
-                elif inventaire.peut_ouvrir :
-                    porte_ouverte = True
+        if not porte.ouverte :    # porte fermee
             
-            elif niv == 2 :   # on essaye ouverture avec une cle
-                if inventaire.cles > 0 and inventaire.depenser_cles(1) :
-                    porte_ouverte = True
-
-            if not porte_ouverte :   # on reste dans la meme case si on a pas reussi a ouvrir la porte
+            if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
                 return False, False, 0
             
-            # on met a jour le statut des portes voisinnes
-
-            porte.ouverte = True
+            porte.ouverte = True  # la porte peut etre ouverte
             self.dict_portes(new_x, new_y)[OPPOSE[d]].ouverte = True
 
-            if self.__portes[new_x][new_y] is None :
+            # il faut assurer coherence entre les deux cases opposées pour garantir que l'on puisse faire des aller-retour sans consommer de ressources davantage
+            # il faut faire le tirage aleatoire d piece si le côté opposé est vide
+            if self.__pieces[new_y][new_x] is None :
                 return False, True, 0
-            
+        
+        if self.__pieces[new_y][new_x] is not None :
+            joueur.deplacer_coords((new_x, new_y), self)
+            return True, False, 1
+        
+        return False, True, 0
 
-            ################## A COMPLETER
+
+
+
+
+
+

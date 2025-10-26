@@ -1,3 +1,5 @@
+from typing import Tuple
+from src.Grille import Grille
 from src.Inventaire import Inventaire
 
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
@@ -17,7 +19,7 @@ class Joueur:
         self.inventaire = Inventaire()
         self.position = (0, 0)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
     
-    def deplacer(self, direction, grille):
+    def deplacer_str(self, direction, grille):
         """
         Déplace le joueur dans la direction donnée si le déplacement est permis.
 
@@ -35,6 +37,32 @@ class Joueur:
         """
         x, y = self.position
         dx, dy = DIRECTIONS[direction]
+        new_x, new_y = x + dx, y + dy
+        
+        if grille.deplacement_permis(new_x, new_y):
+            self.position = new_x, new_y
+            self.inventaire.utiliser_pas(1)  # Consomme 1 pas par déplacement
+            return True
+        return False
+    
+    def deplacer_coords(self, direction : Tuple[int,int], grille : Grille):
+        """
+        Déplace le joueur dans la direction donnée si le déplacement est permis.
+
+        Paramètres
+        ----------
+        direction : str
+            Direction du déplacement ('N', 'S', 'E' ou 'O').
+        grille : objet Grille
+            Représente la grille du jeu contenant la méthode `deplacement_permis(x, y)`.
+
+        Returns
+        -------
+        bool
+            True si le déplacement a eu lieu, False sinon.
+        """
+        x, y = self.position
+        dx, dy = direction
         new_x, new_y = x + dx, y + dy
         
         if grille.deplacement_permis(new_x, new_y):

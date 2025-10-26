@@ -15,9 +15,13 @@ Cyril -> Classe Porte et Pièce
 REUNION :
 
 Thindeka -> ecrire types dans classes ()
-        -> deplacement 2.5
-        -> porte
-        -> revoir implementation 2.5 (fichier grille)
+        -> gerer cas ou joueur arrive dans l antichambre
+        Astuce UI (pré-visualiser sans consommer)
+        Pour les portes : inventaire.peut_ouvrir_porte(niveau)      
+        Pour les coffres : inventaire.peut_ouvrir_coffre()
+        -> commencer interface graphique
+
+Pour creuser : inventaire.peut_creuser_endroit()
 Jihen -> Fichier AutresObjets - classe Coffre + classe Casier + classe Endroits_creuser: ajouter nommbre de objets max dans coffre (nb random entre x et y) pour contraindre nombre d objets consommables dans le coffre (autres objets)
         (ajouter attribuit nb_objets (Qui est random entre x et y))
         -> 2.8
@@ -44,9 +48,7 @@ type
 II. Partie graphique
 
 
-ATTENTION :  NE JAMAIS METTRE D'ACCENTS DANS LES NOMS DE VARIABLES/CODE EN GÉNÉRAL
-             NE PAS METTRE DE MAJUSCULE AU DEBUT D UN ATTRIBUT (SAUF SII TOUT ECRIT EN MAJUSCULE)
-
-
+UPDATE :
+2.6. Ouverture d’une porte - géré dans Grille
 
 
