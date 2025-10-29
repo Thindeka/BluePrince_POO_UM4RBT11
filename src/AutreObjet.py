@@ -1,5 +1,10 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import random
-from src.Inventaire import Inventaire
+
+if TYPE_CHECKING:
+    from src.Inventaire import Inventaire
+
 
 
 class AutreObjet :
@@ -13,7 +18,7 @@ class AutreObjet :
     """
     nom : str = "autre_obj"  # attribut de classe, valeur par défaut
 
-    def appliquer (self, inv : Inventaire) :  
+    def appliquer (self, inv : 'Inventaire') :  
         raise NotImplementedError
 
 
@@ -22,7 +27,7 @@ class Pomme(AutreObjet):
     """ Redonne 2 pas """
     nom = "pomme"
 
-    def appliquer(self, inv: Inventaire):
+    def appliquer(self, inv: 'Inventaire'):
         """
         Ajoute 2 pas à l’inventaire du joueur.
 
@@ -43,7 +48,7 @@ class Banane(AutreObjet):
     """ Redonne 3 pas """
     nom = "banane"
 
-    def appliquer(self, inv: Inventaire):
+    def appliquer(self, inv: 'Inventaire'):
         """
         Ajoute 3 pas à l’inventaire du joueur.
 
@@ -64,7 +69,7 @@ class Gateau(AutreObjet):
     """ Redonne 10 pas """
     nom = "gateau"
 
-    def appliquer(self, inv: Inventaire):
+    def appliquer(self, inv: 'Inventaire'):
         """
         Ajoute 10 pas à l’inventaire du joueur.
 
@@ -85,7 +90,7 @@ class Sandwich(AutreObjet):
     """ Redonne 15 pas """
     nom = "sandwich"
 
-    def appliquer(self, inv: Inventaire):
+    def appliquer(self, inv: 'Inventaire'):
         """
         Ajoute 15 pas à l’inventaire du joueur.
 
@@ -106,7 +111,7 @@ class Repas(AutreObjet):
     """ Redonne 25 pas """
     nom = "repas"
 
-    def appliquer(self, inv: Inventaire):
+    def appliquer(self, inv: 'Inventaire'):
         """
         Ajoute 25 pas à l’inventaire du joueur.
 
@@ -132,7 +137,7 @@ class Coffre :
             contenu_possibles = [Pomme(), Banane(), Gateau(), Sandwich(), Repas()]
         self.contenu_possibles = contenu_possibles
 
-    def ouvrir(self, inv : Inventaire) -> str :
+    def ouvrir(self, inv : 'Inventaire') -> str :
         """Ouvre le coffre si le joueur possède une clé ou un marteau."""
         if not inv.ouvrir_coffre() :   # inv.ouvrir_coffre encapsule la règle 
             return "Le coffre est verrouillé. Il faut une clé ou un marteau"
@@ -152,7 +157,7 @@ class Casier:
             contenu_possibles = [None, Pomme(), Gateau(), Repas(), Sandwich(), Banane()]
         self.contenu_possibles = contenu_possibles
 
-    def ouvrir_casier(self, inv: Inventaire) -> str :
+    def ouvrir_casier(self, inv: 'Inventaire') -> str :
         """Ouvre le casier si le joueur possède une clé."""
         if not inv.depenser_cles(1) :
             return "Vous avez besoin d'une clé pour ouvrir ce casier."
@@ -173,7 +178,7 @@ class EndroitCreuser:
             contenu_possibles = [None, Pomme(), Banane()]
         self.contenu_possibles = contenu_possibles
 
-    def creuser(self, inv: Inventaire):
+    def creuser(self, inv: 'Inventaire'):
         """Creuse si le joueur possède une pelle."""
         if not inv.creuser() :
             return " Vous avex besoin d'une pelle pour creuser."

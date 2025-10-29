@@ -1,8 +1,11 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List, Set
+from typing import List, Set, TYPE_CHECKING
 
-from src.ObjetPermanent import ObjetPermanent
-from src.AutreObjet import AutreObjet
+if TYPE_CHECKING :
+    from src.ObjetPermanent import ObjetPermanent
+    from src.AutreObjet import AutreObjet
+
 
 
 
@@ -46,16 +49,16 @@ class Inventaire :
     ##### OBJETS PERMANENTS
     # à chaque fois qu'on instancie Inventaire, set() est appelé pour créer un nouvel sous ensemble vide indépendant
     noms_objets_permanents : Set[str] = field(default_factory=set)             # on stocke les noms des objets permanents
-    objets_permanents : List[ObjetPermanent] = field(default_factory=list)     # on stocke les instances des objets permanents
+    objets_permanents : List['ObjetPermanent'] = field(default_factory=list)     # on stocke les instances des objets permanents
 
 
     ####### AUTRES OBJETS
     
     noms_autres_objets : Set[str] = field(default_factory=set)        # noms des autres objets 
-    autres_objets : List[AutreObjet] = field(default_factory=list)    # instances des autres objets 
+    autres_objets : List['AutreObjet'] = field(default_factory=list)    # instances des autres objets 
 
 
-    def enregistrer_possession_obj_perm (self, obj_perm : ObjetPermanent) -> bool :
+    def enregistrer_possession_obj_perm (self, obj_perm : 'ObjetPermanent') -> bool :
         """
         Enregistre possession d'un objet permament
         True si ajouté
@@ -134,7 +137,7 @@ class Inventaire :
 
 
  
-    def ajouter_obj_permanent (self, obj_perm : ObjetPermanent) -> bool :   # wrapper 
+    def ajouter_obj_permanent (self, obj_perm : 'ObjetPermanent') -> bool :   # wrapper 
         """ Ajoute objet permanent à l'inventaire si pas présent 
         ne fait rien si objet deja present 
         """
@@ -149,7 +152,7 @@ class Inventaire :
     
 
 
-    #### OUVRIR PORTE
+    #### GESTION OUVERTURE PORTE
     def peut_ouvrir_porte(self, niveau: int) -> bool:
         return self.ouvrir_porte(niveau, dry_run=True)
     
@@ -175,7 +178,7 @@ class Inventaire :
         return False
     
 
-    ####### CRUSER
+    ####### GESTION CREUSER
     def peut_creuser (self) -> bool :
         return self.creuser(dry_run=True)
     
@@ -187,7 +190,7 @@ class Inventaire :
    
     
 
-    ####### OUVRIR COFFRE
+    ####### GESTION OUVERTURE COFFRE
     def peut_ouvrir_coffre (self) -> bool :
         return self.ouvrir_coffre(dry_run=True)
 

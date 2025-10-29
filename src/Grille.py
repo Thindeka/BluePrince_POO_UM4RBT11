@@ -1,8 +1,15 @@
-from typing import Dict, Tuple
+# pour éviter imports croisés
+from __future__ import annotations
+from typing import TYPE_CHECKING, Dict, Tuple
 
-from src.Porte import Porte
-from src.Joueur import Joueur
-from src.Inventaire import Inventaire
+if TYPE_CHECKING:
+    from src.Joueur import Joueur
+    from src.Inventaire import Inventaire  # si tu l’annotes aussi
+    from src.Porte import Porte
+
+
+
+
 
 
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
@@ -54,7 +61,7 @@ class Grille :
         return 0 <= x < self.__largeur and 0 <= y < self.__hauteur
     
 
-    def dict_portes (self, x : int, y : int) -> Dict[str, Porte] :
+    def dict_portes (self, x : int, y : int) -> Dict[str, 'Porte'] :
         """ 
         Retourne le dictionnaire des portes de la case (x,y)
         S'il n'est pas encore existant, le crée vide 
@@ -90,7 +97,7 @@ class Grille :
             return 2
 
 
-    def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> Porte :
+    def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> 'Porte' :
         """ Retourne la porte demandée (et son mirroir) en s'assurant qu'elle existe bien avant de l'utiliser
         Initialisation paresseuse
         """
@@ -126,7 +133,7 @@ class Grille :
 
     #### GESTION DEPLACEMENT JOUEUR
 
-    def deplacer_joueur (self, joueur : Joueur, inventaire : Inventaire, dx : int, dy : int) -> Tuple[bool, bool, int] :
+    def deplacer_joueur (self, joueur : 'Joueur', inventaire : 'Inventaire', dx : int, dy : int) -> Tuple[bool, bool, int] :
         """"
         RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int)"""
         
