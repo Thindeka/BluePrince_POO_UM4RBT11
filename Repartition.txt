@@ -8,7 +8,6 @@ REUNION :
 
 Thindeka -> Classe Grille, Inventaire et ObjetsPermanents
 Jihen -> classe Joueur, AutresObjets et Game
-
 Cyril -> Classe Porte et Pièce 
 
 

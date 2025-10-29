@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 import random
 
 if TYPE_CHECKING:
@@ -131,20 +131,25 @@ class Repas(AutreObjet):
 class Coffre :
     """Coffre qu'on peut ouvrir avec une clé ou un marteau."""
     
-    def __init__(self, contenu_possibles=None):
+    def __init__(self, min_objets: int = 1, max_objets: int = 3, contenu_possibles: Optional[List[AutreObjet]] = None):
         # Par défaut, le coffre peut contenir un des objets consommables
         if contenu_possibles is None:
             contenu_possibles = [Pomme(), Banane(), Gateau(), Sandwich(), Repas()]
         self.contenu_possibles = contenu_possibles
+        self.nb_objets = random.randint(min_objets, max_objets)  # Nombre d'objets réellement dans le coffre
 
     def ouvrir(self, inv : 'Inventaire') -> str :
         """Ouvre le coffre si le joueur possède une clé ou un marteau."""
         if not inv.ouvrir_coffre() :   # inv.ouvrir_coffre encapsule la règle 
             return "Le coffre est verrouillé. Il faut une clé ou un marteau"
-        objet = random.choice(self.contenu_possibles)
-        objet.appliquer(inv)
-        return f" Le coffre contenait : {objet.nom}"
         
+        objets_trouves = random.choices(self.contenu_possibles, k=self.nb_objets)
+        noms_trouves = []
+        for obj in objets_trouves:
+            obj.appliquer(inv)
+            noms_trouves.append(obj.nom)
+        return f"Le coffre contenait : {', '.join(noms_trouves)}"
+
 
 
 
@@ -152,38 +157,49 @@ class Casier:
     ####### implememnter fait que juste contenu dans piece vestiaire
     """Casier qu'on peut ouvrir uniquement avec une clé."""
     
-    def __init__(self, contenu_possibles=None):
+    def __init__(self, min_objets: int = 1, max_objets: int = 2, contenu_possibles: Optional[List[Optional[AutreObjet]]] = None):
         if contenu_possibles is None:
             contenu_possibles = [None, Pomme(), Gateau(), Repas(), Sandwich(), Banane()]
         self.contenu_possibles = contenu_possibles
+        self.nb_objets = random.randint(min_objets, max_objets)
 
     def ouvrir_casier(self, inv: 'Inventaire') -> str :
         """Ouvre le casier si le joueur possède une clé."""
         if not inv.depenser_cles(1) :
             return "Vous avez besoin d'une clé pour ouvrir ce casier."
-        objet = random.choice(self.contenu_possibles)
-        if objet :  # le casier peut être vide
-            objet.appliquer(inv)
-            return f" Vous avez trouvé : {objet.nom}"
-        return " Le casier était vide."
-
+        
+        objets_trouves = random.choices(self.contenu_possibles, k=self.nb_objets)
+        noms_trouves = []
+        for obj in objets_trouves:
+            if obj:
+                obj.appliquer(inv)
+                noms_trouves.append(obj.nom)
+        if noms_trouves:
+            return f"Vous avez trouvé : {', '.join(noms_trouves)}"
+        return "Le casier était vide."
 
 
 
 class EndroitCreuser:
     """Endroit où creuser avec une pelle pour trouver des objets."""
     
-    def __init__(self, contenu_possibles=None):
+    def __init__(self, min_objets: int = 1, max_objets: int = 2, contenu_possibles: Optional[List[Optional[AutreObjet]]] = None):
         if contenu_possibles is None:
             contenu_possibles = [None, Pomme(), Banane()]
         self.contenu_possibles = contenu_possibles
+        self.nb_objets = random.randint(min_objets, max_objets)
 
     def creuser(self, inv: 'Inventaire'):
         """Creuse si le joueur possède une pelle."""
         if not inv.creuser() :
             return " Vous avex besoin d'une pelle pour creuser."
-        objet = random.choice(self.contenu_possibles)
-        if objet:   # l'endroit peut ne rien contenir
-            objet.appliquer(inv)
-            return f" Vous avez trouvé : {objet.nom}"
+        
+        objets_trouves = random.choices(self.contenu_possibles, k=self.nb_objets)
+        noms_trouves = []
+        for obj in objets_trouves:
+            if obj:
+                obj.appliquer(inv)
+                noms_trouves.append(obj.nom)
+        if noms_trouves:
+            return f"Vous avez trouvé : {', '.join(noms_trouves)}"
         return "L'endroit à creuser est vide"

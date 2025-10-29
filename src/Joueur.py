@@ -21,7 +21,7 @@ class Joueur:
     """
     def __init__(self) -> None :
         self.inventaire = Inventaire()
-        self.position = (2, 8)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
+        self.position = (3, 9)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
     
 
 

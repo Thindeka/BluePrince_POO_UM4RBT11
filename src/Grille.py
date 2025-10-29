@@ -28,8 +28,8 @@ class Grille :
         self.__hauteur = hauteur
         self.__pieces = [[None for _ in range (self.__largeur)] for _ in range (self.__hauteur)]
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
-
-
+        #self.sortie = (self.__largeur - 1, self.__hauteur - 1)
+        self.sortie = (3, 0)  # (x, y) => x=3, y=0
     @property
     def largeur (self) :
         """ getter de l'attribut __largeur """
