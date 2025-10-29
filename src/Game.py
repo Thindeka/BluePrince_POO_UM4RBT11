@@ -9,11 +9,12 @@ class Game:  # a compléter
     Représente la logique principale du jeu.
     """
 
-    def __init__(self, grille : Grille, joueur : Joueur, pioche_pieces):
-        self.grille = grille
-        self.joueur = joueur
-        self.inv = joueur.inventaire # à voir si cela est une bonne idée (incooherences?)
-        self.pioche_pieces = pioche_pieces
+    def __init__(self):
+        self.grille = Grille()
+        self.joueur = Joueur()
+        self.inv = self.joueur.inventaire # à voir si cela est une bonne idée (incooherences?)
+        self.pioche_pieces = Pioche()
+        self.state = "exploration"   # exploration au départ, sinon : "tirage", "victoire", "game_over"
 
 
 

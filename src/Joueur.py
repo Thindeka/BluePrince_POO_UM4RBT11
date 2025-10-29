@@ -17,7 +17,7 @@ class Joueur:
     """
     def __init__(self):
         self.inventaire = Inventaire()
-        self.position = (0, 0)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
+        self.position = (2, 8)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
     
     def deplacer_str(self, direction, grille):
         """
