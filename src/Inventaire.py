@@ -44,25 +44,33 @@ class Inventaire :
 
     
     ##### OBJETS PERMANENTS
-
     # à chaque fois qu'on instancie Inventaire, set() est appelé pour créer un nouvel sous ensemble vide indépendant
-    # on stocke les noms des objets permanents
-    noms_objets_permanents : Set[str] = field(default_factory=set)  
-    
-    # on stocke les instances des objets permanents 
-    objets_permanents : List[ObjetPermanent] = field(default_factory=list)
+    noms_objets_permanents : Set[str] = field(default_factory=set)             # on stocke les noms des objets permanents
+    objets_permanents : List[ObjetPermanent] = field(default_factory=list)     # on stocke les instances des objets permanents
 
 
     ####### AUTRES OBJETS
-
-    # noms des autres objets
-    noms_autres_objets : Set[str] = field(default_factory=set)
-
-    # instances des autres objets  
-    autres_objets : List[AutreObjet] = field(default_factory=list)
+    
+    noms_autres_objets : Set[str] = field(default_factory=set)        # noms des autres objets 
+    autres_objets : List[AutreObjet] = field(default_factory=list)    # instances des autres objets 
 
 
-    def utiliser_pas (self, n=1) -> None :
+    def enregistrer_possession_obj_perm (self, obj_perm : ObjetPermanent) -> bool :
+        """
+        Enregistre possession d'un objet permament
+        True si ajouté
+        False si on l'avait deja
+        """
+        if obj_perm.nom in self.noms_objets_permanents :
+            return False
+        self.noms_objets_permanents.add(obj_perm.nom)
+        self.objets_permanents.append(obj_perm)
+        return True
+
+
+
+
+    def utiliser_pas (self, n : int = 1) -> None :
         """ Utilsie n pas
         
         Parametres 
@@ -77,14 +85,14 @@ class Inventaire :
         """
         self.pas = max(0, self.pas - max(0,n))
 
-    def ramasser_pas(self, n) :
+    def ramasser_pas(self, n : int) :
         self.pas += max(0,n)   # on évite le comportement indésirables de faire un ajout avec un nombre négatif
 
 
-    def ramasser_pieceOr (self, n) -> None :
+    def ramasser_pieceOr (self, n : int) -> None :
         self.piecesOr += max(0,n)  # on évite le comportement indésirables de faire un ajout avec un nombre négatif
 
-    def depenser_pieceOr (self, n) -> bool :
+    def depenser_pieceOr (self, n : int) -> bool :
         if self.piecesOr >= n and n >= 0 :
             self.piecesOr -= max(0,n)
             return True
@@ -92,10 +100,10 @@ class Inventaire :
     
 
 
-    def ramasser_gemmes (self, n) -> None :
+    def ramasser_gemmes (self, n : int) -> None :
         self.gemmes += max(0,n) 
 
-    def depenser_gemmes (self, n) -> bool :
+    def depenser_gemmes (self, n : int) -> bool :
         if self.gemmes >= n and n >= 0 :
             self.gemmes -= max(0,n)
             return True
@@ -103,14 +111,15 @@ class Inventaire :
     
 
 
-    def ramasser_cles (self, n) -> None :
+    def ramasser_cles (self, n : int) -> None :
         self.cles += max(0,n)  
 
-    def depenser_cles (self, n) -> bool :
-        if self.cles > 0 :
-            self.cles -= 1
-            return True
-        return False
+    def depenser_cles (self, n : int = 1) -> bool :
+        n = max (0,n)
+        if self.cles < n :
+            return False 
+        self.cles -= n 
+        return True
     
 
 
@@ -125,14 +134,13 @@ class Inventaire :
 
 
  
-    def ajouter_obj_permanent (self, obj_perm : ObjetPermanent) -> None :
-        """ Ajoute objet permanent à l'inventaire si pas présent """
-        if obj_perm.nom in self.noms_objets_permanents :
-            return 
-
-        self.noms_objets_permanents.add(obj_perm.nom)
-        self.objets_permanents.append(obj_perm)
+    def ajouter_obj_permanent (self, obj_perm : ObjetPermanent) -> bool :   # wrapper 
+        """ Ajoute objet permanent à l'inventaire si pas présent 
+        ne fait rien si objet deja present 
+        """
+        present = obj_perm.nom in self.noms_objets_permanents
         obj_perm.appliquer(self)
+        return not present
 
     
     def possede_obj_permanent (self, nom : str) -> bool :

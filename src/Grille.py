@@ -158,7 +158,7 @@ class Grille :
                 return False, True, 0
         
         if self.__pieces[new_y][new_x] is not None :
-            joueur.deplacer_coords((new_x, new_y), self)
+            joueur.deplacer_coords((new_x-x, new_y-y), self)
             return True, False, 1
         
         return False, True, 0

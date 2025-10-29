@@ -52,3 +52,7 @@ UPDATE :
 2.6. Ouverture d’une porte - géré dans Grille
 
 
+AutreObjet.appliquer(inv) → applique un effet (ex : +pas).
+
+ObjetPermanent.appliquer(inv) → enregistre la possession dans l’inventaire puis applique ses éventuels bonus (mais aucun booléen de capacité)
+La logique des capacités des objets reste du côté de l'inventaire

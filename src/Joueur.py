@@ -67,7 +67,6 @@ class Joueur:
         
         if grille.deplacement_permis(new_x, new_y):
             self.position = new_x, new_y
-            self.inventaire.utiliser_pas(1)  # Consomme 1 pas par déplacement
             return True
         return False
     
