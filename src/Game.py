@@ -1,7 +1,7 @@
 from src.Grille import Grille
 from src.Joueur import Joueur
 from src.Piece import Piece
-from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas
+from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
 from src.Pioche import Pioche
 
 class Game:
@@ -33,7 +33,7 @@ class Game:
         """
         Vérifie si le joueur a atteint la sortie de la grille.
         """
-        return self.joueur.position == self.grille.sortie  # self.grille.sortie à définir dans Grille
+        return self.joueur.position == self.grille.sortie 
 
 
     def deplacer_joueur(self, direction: str): # gestion globale du moove du jouer / différent de def dans classe grille qui gère les aspects spatiaux 
@@ -94,6 +94,18 @@ class Game:
                 self.inv.autres_objets.remove(obj)
                 return f"Vous avez utilisé une {obj.nom}."
         return "Objet non trouvé dans l’inventaire."
+
+    def ouvrir_coffre(self, coffre: Coffre):
+        """Ouvre un coffre avec objets aléatoires."""
+        return coffre.ouvrir(self.inv)
+
+    def ouvrir_casier(self, casier: Casier):
+        """Ouvre un casier avec objets aléatoires."""
+        return casier.ouvrir_casier(self.inv)
+
+    def creuser_endroit(self, endroit: EndroitCreuser):
+        """Creuse un endroit avec objets aléatoires."""
+        return endroit.creuser(self.inv)
 
     def statut(self):   # statut du jeu
         """
