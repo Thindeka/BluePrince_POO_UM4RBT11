@@ -6,6 +6,9 @@ import sys
 from src.Game import Game
 from ui.input_handler import InputHandler
 from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
+#from src.constantes import TAILLE_CELLULE, HUD_H, MARGE, DIRECTIONS, COLOR_CELL
+from ui.renderer import render_grille, render_hud, render_piece
+
 
 # DONNEES AFFICHAGE
 TAILLE_CELLULE = 64     # px
@@ -29,16 +32,6 @@ def coords_to_px (x, y) :
     return (new_x,new_y)
 
 
-
-
-
-
-
-
-
-
-
-
 def main() :
     pygame.init()
     pygame.display.set_caption('BluePrince')  # caption pour l'écran
@@ -57,8 +50,6 @@ def main() :
 
     # input handler
     input_handler = InputHandler()
-
-
 
     # --------------- BOUCLE DE JEU ---------------
 
@@ -98,40 +89,54 @@ def main() :
 
         ecran.fill(COLOR_BG)
 
-        # suite de ce code avec CHATGPT (à voir si c'est compatible)
+        ecran.fill((10, 10, 10))
+        render_grille(ecran, game)
+        render_hud(ecran, game)
+        pygame.display.flip()
 
-        # HUD simple (compteurs)  
-        inv = game.joueur.inventaire
-        hud_text = f"Pas: {inv.pas}   Gemmes: {inv.gemmes}   Clés: {inv.cles}   Dés: {inv.des}"
-        txt = police.render(hud_text, True, COLOR_TEXT)
-        ecran.blit(txt, (MARGE, (HUD_H - txt.get_height()) // 2))
+        clock.tick(30)
+
+    pygame.quit()
+
+        # quit avant voir la compatibilité des deux prop
+        # suite de ce code avec CHATGPT (à voir si c'est compatible)
+        
+        # HUD simple (compteurs)
+        # 
+        # mit en commentaire pr l'instant methode plus facile   
+
+
+#        inv = game.joueur.inventaire
+#        hud_text = f"Pas: {inv.pas}   Gemmes: {inv.gemmes}   Clés: {inv.cles}   Dés: {inv.des}"
+#        txt = police.render(hud_text, True, COLOR_TEXT)
+#        ecran.blit(txt, (MARGE, (HUD_H - txt.get_height()) // 2))
 
         # Grille (cases)
-        for y in range(game.grille.hauteur):
-            for x in range(game.grille.largeur):
-                sx, sy = coords_to_px(x, y)
-                pygame.draw.rect(
-                    ecran, COLOR_CELL,
-                    pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE),
-                    border_radius=6
-                )
-                # (Option) dessiner le quadrillage
-                pygame.draw.rect(
-                    ecran, COLOR_GRID,
-                    pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE),
-                    width=1,
-                    border_radius=6
-                )
-
+#        for y in range(game.grille.hauteur):
+#            for x in range(game.grille.largeur):
+#                sx, sy = coords_to_px(x, y)
+#               pygame.draw.rect(
+#                    ecran, COLOR_CELL,
+#                    pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE),
+#                    border_radius=6
+#                )
+#                # (Option) dessiner le quadrillage
+#                pygame.draw.rect(
+#                    ecran, COLOR_GRID,
+#                    pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE),
+#                    width=1,
+#                   border_radius=6
+#                )
+#
         # Joueur (cercle au centre de la case)
-        px, py = game.joueur.position  # source de vérité unique :contentReference[oaicite:4]{index=4}
-        cx = MARGE + px * TAILLE_CELLULE + TAILLE_CELLULE // 2
-        cy = HUD_H + MARGE + py * TAILLE_CELLULE + TAILLE_CELLULE // 2
-        pygame.draw.circle(ecran, COLOR_PLAYER, (cx, cy), TAILLE_CELLULE // 4)
+#        px, py = game.joueur.position  # source de vérité unique :contentReference[oaicite:4]{index=4}
+#        cx = MARGE + px * TAILLE_CELLULE + TAILLE_CELLULE // 2
+#        cy = HUD_H + MARGE + py * TAILLE_CELLULE + TAILLE_CELLULE // 2
+#        pygame.draw.circle(ecran, COLOR_PLAYER, (cx, cy), TAILLE_CELLULE // 4)
         
         # Flip
-        pygame.display.flip()
-        clock.tick(FPS)
+#        pygame.display.flip()
+#        clock.tick(FPS)
 
     pygame.quit()
     sys.exit(0)

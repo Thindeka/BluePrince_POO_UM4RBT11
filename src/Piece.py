@@ -2,6 +2,7 @@ import random
 from src.AutreObjet import AutreObjet
 from src.Inventaire import Inventaire
 from src.ObjetPermanent import ObjetPermanent
+from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
 
 class Piece :
     """
@@ -35,11 +36,13 @@ class Piece :
         (sauf si elle et en plusieurs exemplaires) -> définir nb exemplaire de chaque pièce
     """
 
-    def __init__(self, rarete, cout, porte):
+    def __init__(self, nom="piece", rarete=1, cout=1, porte=2):
         """rareté, coût"""
+        self._nom = nom
         self._rarete = rarete
         self._cout = cout
         self._porte = porte
+        self.objets: list[AutreObjet | ObjetPermanent | Coffre | Casier | EndroitCreuser] = []
         ### à quel moment définir les pièces disponibles et leur probabilité de tirage ?
         self._pieces_disponibles = [] ### définir les pièces disponibles dans le manoir
         # Chaque incrément du niveau de rareté doit diviser par trois la probabilité de tirer la pièce.
@@ -68,6 +71,17 @@ class Piece :
     
     def appliquer (self, inv : Inventaire) :  
         raise NotImplementedError
+
+    def interagir(self, inv: Inventaire):
+        messages = []
+        for obj in self.objets:
+            if isinstance(obj, AutreObjet):
+                obj.appliquer(inv)
+                messages.append(obj.nom)
+            elif isinstance(obj, (Coffre, Casier, EndroitCreuser)):
+                pass
+        return messages
+
 
 class Jaunes(Piece):
     """type de pièce : magasin"""
@@ -166,4 +180,6 @@ class vertes(Piece):
 class dés:
     """possibilité de retirer aléatoirement des pièces si le joueur possède un dé"""
 
-
+# Problème > Classes Jaunes, vertes incomplètes. 
+# Il faut Passer inventaire ou game pour pouvoir interagir.
+# Ajouter contenu réel : Coffre(), EndroitCreuser(), AutreObjet().
