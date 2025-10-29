@@ -19,8 +19,8 @@ class Joueur:
     position : tuple(int, int)
         Coordonnées (x, y) du joueur dans la grille.
     """
-    def __init__(self, inventaire : Inventaire | None = None) -> None :
-        self.inventaire = inventaire or Inventaire()
+    def __init__(self) -> None :
+        self.inventaire = Inventaire()
         self.position = (2, 8)  # Position initiale dans la grille (peut être modifiée selon le jeu) ###### a modifier
     
 
