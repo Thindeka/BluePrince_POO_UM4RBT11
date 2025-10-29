@@ -1,6 +1,7 @@
 # pour éviter imports croisés
 from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Tuple
+import random
 
 if TYPE_CHECKING:
     from src.Joueur import Joueur
@@ -30,6 +31,8 @@ class Grille :
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
         #self.sortie = (self.__largeur - 1, self.__hauteur - 1)
         self.sortie = (3, 0)  # (x, y) => x=3, y=0
+
+
     @property
     def largeur (self) :
         """ getter de l'attribut __largeur """
@@ -87,14 +90,21 @@ class Grille :
         if y == 0 : # rangée du haut
             return 2 
         
-        hauteur_norm = (self.__hauteur - 1 - y) / (self.__hauteur - 1)    # hauteur normalisee de la grille
+        hauteur_norm = (self.__hauteur - 1 - y) / (self.__hauteur - 1)
+        
+        p0 = max(0.5 - 0.5 * hauteur_norm, 0.1)  # probabilité niveau 0 etccc
+        p1 = 0.3
+        p2 = 1 - p0 - p1
 
-        if hauteur_norm < 0.33 :
-            return 0
-        elif hauteur_norm < 0.66 :
-            return 1
-        else :
-            return 2
+        return random.choices([0, 1, 2], weights=[p0, p1, p2])[0]
+
+    def initialiser_portes(self):
+        """Remplit la grille avec des portes aléatoires par position."""
+        for x in range(self.colonnes):
+            for y in range(self.lignes):
+                self.__portes[(x, y)] = {}
+                for dir in ["N", "S", "E", "O"]:
+                    self.__portes[(x, y)][dir] = self.statut_porte(y)
 
 
     def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> 'Porte' :

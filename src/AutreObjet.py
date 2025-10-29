@@ -154,7 +154,7 @@ class Coffre :
 
 
 class Casier:
-    ####### implememnter fait que juste contenu dans piece vestiaire
+    ####### implementer fait que juste contenu dans piece vestiaire
     """Casier qu'on peut ouvrir uniquement avec une clé."""
     
     def __init__(self, min_objets: int = 1, max_objets: int = 2, contenu_possibles: Optional[List[Optional[AutreObjet]]] = None):
@@ -192,7 +192,7 @@ class EndroitCreuser:
     def creuser(self, inv: 'Inventaire'):
         """Creuse si le joueur possède une pelle."""
         if not inv.creuser() :
-            return " Vous avex besoin d'une pelle pour creuser."
+            return " Vous avez besoin d'une pelle pour creuser."
         
         objets_trouves = random.choices(self.contenu_possibles, k=self.nb_objets)
         noms_trouves = []

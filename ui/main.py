@@ -5,7 +5,7 @@ import pygame
 import sys
 from src.Game import Game
 from ui.input_handler import InputHandler
-
+from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
 
 # DONNEES AFFICHAGE
 TAILLE_CELLULE = 64     # px
@@ -26,7 +26,7 @@ def coords_to_px (x, y) :
     donne les coordonnées (x,y) à l'échelle de l'ecran en pixels """
     new_x = MARGE + x * TAILLE_CELLULE
     new_y = HUD_H + MARGE + y * TAILLE_CELLULE
-    return (x,y)
+    return (new_x,new_y)
 
 
 
@@ -70,22 +70,31 @@ def main() :
 
         # SORTIE DU JEU
         if input_handler.get_quit :  
-            runnig = False
+            running = False
             break
 
         # EXECUTER LES ACTIONS DEMANDEES
-        if 'deplacement' in actions :
-            dx, dy = actions['deplacement']
-            deplacement, ouverture_porte, pas_consommes = game.grille.deplacer_joueur(game.joueur, game.joueur.inventaire, dx, dy)
-
-            if ouverture_porte :
+        if 'deplacer' in actions:
+            dx, dy = actions['deplacer']
+            msg = game.deplacer_joueur({k for k,v in DIRECTIONS.items() if v==(dx,dy)}.pop())
+            if "nouvelle pièce" in msg:
                 game.state = "tirage" # il y aura l'écran de tirage qui s'affiche à ce moment
 
-        if actions.get('ouvrir') : pass    # à compléter
-        if actions.get('creuser') : pass    # à compléter
-        if actions.get('relancer_tirage') and game.state == "tirage" : pass    # à compléter
-        if actions.get('confirmer') and game.state == "tirage" : pass    # à compléter
+        if actions.get('ouvrir'):
+            # Exemple : ouvrir un coffre à côté du joueur
+            for objet in game.grille.pieces[game.joueur.position[1]][game.joueur.position[0]]:
+                if isinstance(objet, (Coffre, Casier)):
+                    print(game.ouvrir_coffre(objet))
 
+        if actions.get('creuser'):
+            for objet in game.grille.pieces[game.joueur.position[1]][game.joueur.position[0]]:
+                if isinstance(objet, EndroitCreuser):
+                    print(game.creuser_endroit(objet))
+
+        if actions.get('relancer_tirage') and game.state == "tirage":
+            print(game.tirer_nouvelle_piece())
+        if actions.get('confirmer') and game.state == "tirage":
+            print(game.tirer_nouvelle_piece())
 
         ecran.fill(COLOR_BG)
 
