@@ -6,8 +6,7 @@ import sys
 from src.Game import Game
 from ui.input_handler import InputHandler
 from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
-from ui.renderer import Renderer, render_grille, render_hud, render_piece
-
+from ui.renderer import Renderer
 
 # DONNEES AFFICHAGE
 LARGEUR_ECRAN = 900

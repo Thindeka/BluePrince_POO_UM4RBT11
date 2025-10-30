@@ -31,12 +31,6 @@ class Renderer :
         self.render_joueur(ecran, game)  # afficher joueur
         self.render_hud(ecran, game)  # afficher hud
 
-<<<<<<< HEAD
-    print("Position joueur :", game.joueur.position)
-
-    # Dessine le joueur
-    if hasattr(game, "joueur"):
-=======
         if game.state == "tirage" and game.tirage_en_cours :
             self.render_ecran_tirage(ecran, game)
 
@@ -45,10 +39,6 @@ class Renderer :
         elif game.state == "victoire" :
             self.render_texte_centre(ecran, "VICTOIRE", (50, 200, 50))
 
-
-
-   
-    
 
     def render_ecran_tirage(self, ecran : pygame.Surface, game : 'Game'):
         
@@ -173,7 +163,6 @@ class Renderer :
 
     def render_joueur(self, ecran : pygame.Surface, game : 'Game') -> None :
         # dessine le joueur
->>>>>>> e2adb17daf83667ae714654b582920a8eec60865
         x, y = game.joueur.position
         px = MARGE + x * TAILLE_CELLULE + TAILLE_CELLULE // 2
         py = HUD_H + MARGE + y * TAILLE_CELLULE + TAILLE_CELLULE // 2
@@ -182,14 +171,13 @@ class Renderer :
     
     ######### FOCNTIONS AUXILIAIRES
 
-<<<<<<< HEAD
-def render_piece(ecran, piece, position):
-    """(Optionnel) Affiche une pièce individuelle — utile pour debug."""
-    x, y = position
-    sx, sy = coords_to_px(x, y)
-    rect = pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE)
-    pygame.draw.rect(ecran, (100, 100, 255), rect, 2)
-=======
+    def render_piece(ecran, piece, position):
+        """(Optionnel) Affiche une pièce individuelle — utile pour debug."""
+        x, y = position
+        sx, sy = coords_to_px(x, y)
+        rect = pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE)
+        pygame.draw.rect(ecran, (100, 100, 255), rect, 2)
+
     def _color_for_piece (self, piece : Piece2) -> tuple[int, int, int] :
         
         c = piece.couleur
@@ -227,4 +215,3 @@ def render_piece(ecran, piece, position):
             MARGE + x * TAILLE_CELLULE,
             HUD_H + MARGE + y * TAILLE_CELLULE,
         )
->>>>>>> e2adb17daf83667ae714654b582920a8eec60865
