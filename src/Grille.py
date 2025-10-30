@@ -3,10 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Tuple
 import random
 
+from src.Porte import Porte
+
 if TYPE_CHECKING:
     from src.Joueur import Joueur
     from src.Inventaire import Inventaire  # si tu l’annotes aussi
     from src.Porte import Porte
+    from src.Piece2 import Piece2
 
 
 
@@ -27,7 +30,7 @@ class Grille :
     def __init__(self, largeur=5, hauteur=9) :
         self.__largeur = largeur
         self.__hauteur = hauteur
-        self.__pieces = [[None for _ in range (self.__largeur)] for _ in range (self.__hauteur)]
+        self.__pieces = [[None for _ in range(self.__largeur)] for __ in range(self.__hauteur)]
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
         #self.sortie = (self.__largeur - 1, self.__hauteur - 1)
         self.sortie = (3, 0)  # (x, y) => x=3, y=0
@@ -52,6 +55,12 @@ class Grille :
         """ getter de l'attribut __portes """
         return self.__portes
     
+    def placer_piece (self, x : int, y : int , piece) -> None :
+        """ setter porte aux coords donnees """
+        self.__pieces[y][x] = piece
+
+    def get_piece (self, x : int, y : int) -> Piece2 | None :
+        return self.__pieces[y][x]
 
     
 
@@ -97,14 +106,6 @@ class Grille :
         p2 = 1 - p0 - p1
 
         return random.choices([0, 1, 2], weights=[p0, p1, p2])[0]
-
-    def initialiser_portes(self):
-        """Remplit la grille avec des portes aléatoires par position."""
-        for x in range(self.colonnes):
-            for y in range(self.lignes):
-                self.__portes[(x, y)] = {}
-                for dir in ["N", "S", "E", "O"]:
-                    self.__portes[(x, y)][dir] = self.statut_porte(y)
 
 
     def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> 'Porte' :
