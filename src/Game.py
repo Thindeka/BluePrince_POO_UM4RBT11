@@ -16,11 +16,13 @@ class Game:
         self.joueur = Joueur()
         self.inv = self.joueur.inventaire
         self.pioche_pieces = Pioche2()
-        self.state : str = "exploration"  # autres états : "tirage", "victoire", "game_over"
+        self.state : str = "exploration"  # autres états : "tirage", "victoire", "game_over", "achat"
         self.tour = 0  # compteur de tours
 
         self.tirage_en_cours : Optional[Dict[str, Any]] = None  # dictionnaire à clés texte, valeurs de types mélangés”
         # self.boost_couleur
+
+        self.contexte_achat : Optional[Dict[str, Any]] = None
 
         # il faut qu il y ait une piece au depart a la position du joueur 
         x0, y0 = self.joueur.position
@@ -47,8 +49,15 @@ class Game:
         
         deplacement, ouverture, pas_consommes = self.grille.deplacer_joueur(self.joueur, self.inv, dx, dy)
 
-        if deplacement and pas_consommes :
-            self.inv.utiliser_pas(pas_consommes)  # il faut consommer les pas si on s est deplacé
+        if deplacement :
+            if pas_consommes :
+                self.inv.utiliser_pas(pas_consommes)  # il faut consommer les pas si on s est deplacé
+
+            x, y = self.joueur.position
+            piece = self.grille.get_piece(x,y)
+
+            if piece is not None :
+                piece.effet_entree(self)
 
         if ouverture :
             x, y = self.joueur.position

@@ -2,9 +2,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Set, Optional
+import random
 
 if TYPE_CHECKING:
     from src.Grille import Grille
+    from src.Inventaire import Inventaire
+    from src.Game import Game
 
 
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
@@ -110,8 +113,9 @@ class Piece2 :
                 continue ########### à completer comportement plus tard par grille.piece_at()
 
             if isinstance(voisin, Piece2) :
-                if voisin.a_porte(OPPOSE[d] and not self.a_porte(d)) :
-                    return False # car c est incoherent si le voisin a une porte vers la case courante masi que la case courant en a pas de porte vers le voisin
+                if voisin.a_porte(OPPOSE[d]) :
+                    if not self.a_porte(d) :
+                        return False # car c est incoherent si le voisin a une porte vers la case courante masi que la case courant en a pas de porte vers le voisin
         
         return True
     
@@ -122,24 +126,106 @@ class Piece2 :
         grille.placer_piece(x,y,self) 
         
         for d in self.forme.ens_portes :
-            
+            porte = grille.garantie_porte(x, y, d)
             new_x, new_y = grille.voisin(x, y, d)
 
             if not grille.deplacement_permis(new_x, new_y) :
                 continue # on ne place pas de porte la ou on ne peut pas
 
-            porte = grille.garantie_porte(x, y, d)
             voisin = grille.get_piece(new_x, new_y)
+            if voisin is None :
+                continue
 
-            if isinstance(voisin, Piece2) and voisin.a_porte(OPPOSE[d]) :
-                porte.ouverte = True   # j ouvre la porte de al case courante 
-                grille.dict_portes(new_x, new_y)[OPPOSE[d]].ouverte = True    # j ouvre la porte de la case voisinne
+            portes_voisin = grille.dict_portes(new_x, new_y)
+            porte_retour = portes_voisin.get(OPPOSE[d])
+
+            if porte_retour is None :
+                continue
+
+            porte.ouverte = True   # j ouvre la porte de al case courante 
+            porte_retour.ouverte = True    # j ouvre la porte de la case voisinne
 
 
     
-    def effet_entree (self, game) :
-        # a completer
-        return 
+    def effet_entree (self, game : 'Game') :
+        
+        inv : 'Inventaire' = game.inv
+
+        # JAUNE = MAGASIN = ECHANGER OR PAR OBJETS
+        if self.couleur is CouleurPiece.JAUNE :
+            game.state = "achat"
+            game.contexte_achat = {
+                "piece" : self,
+                "produits" : [
+                    ("clé", 3, "cle"),
+                    ("dé", 4, "de"),
+                    ("pelle", 6, "pelle"),
+                ],
+            }
+            return 
+
+
+        # VERT = JARDIN = CONTIENT GEMMES/ENDROITS_CREUSER/OBJ_PERM
+        if self.couleur is CouleurPiece.VERT :
+
+            inv.ramasser_gemmes(1) # contient souvent gemmes
+
+            # contient parfois endroit a creuser
+            if random.random() < 0.50 :
+                if inv.peut_creuser() :
+                    inv.ramasser_pieceOr(1)
+
+            if random.random() < 0.20 :
+                from src.ObjetPermanent import Pelle, Marteau, KitCrochetage, DetecteurMetaux, PatteLapin
+                objets = [Pelle(), Marteau(), KitCrochetage(), DetecteurMetaux(), PatteLapin()]
+                objets_possibles = [o for o in objets if not inv.possede_obj_permanent(o.nom)]  # on veux donner qqch de nouveau
+                if objets_possibles :
+                    o = random.choice(objets_possibles)
+                    inv.ajouter_obj_permanent(o)
+            
+            return
+
+
+        
+        # VIOLET = CHAMBRE = REGAGNER PAS
+        if self.couleur is CouleurPiece.VIOLET :
+            inv.ramasser_pas(2)   # base
+            if random.random() < 0.25 :
+                inv.ramasser_pas(1) 
+            return 
+        
+
+
+        # ORANGE = COULOIR : BCP PORTES
+        # BLEU = PIECE COMMUNE
+        if self.couleur is CouleurPiece.ORANGE or self.couleur is CouleurPiece.BLEU :
+            return
+
+        # ROUGE = MALUS
+        if self.couleur is CouleurPiece.ROUGE :
+            inv.utiliser_pas(2)
+            if random.random() < 0.20 and inv.piecesOr > 0 :
+                inv.depenser_pieceOr(1)
+            return
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def effet_tirage (self, game) -> None :
         # a completer 

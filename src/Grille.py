@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from src.Joueur import Joueur
     from src.Inventaire import Inventaire  # si tu l’annotes aussi
     from src.Porte import Porte
+    from src.Piece2 import Piece2
 
 
 
@@ -54,11 +55,11 @@ class Grille :
         """ getter de l'attribut __portes """
         return self.__portes
     
-    def placer_piece (self, x, y, piece) -> None :
+    def placer_piece (self, x : int, y : int , piece) -> None :
         """ setter porte aux coords donnees """
         self.__pieces[y][x] = piece
 
-    def get_piece (self, x, y) :
+    def get_piece (self, x : int, y : int) -> Piece2 | None :
         return self.__pieces[y][x]
 
     
