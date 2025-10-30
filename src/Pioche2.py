@@ -63,7 +63,7 @@ class Pioche2 :
     def _poids (self, piece : Piece2) -> float :
         # retourne le poids de la piece
         p = correspondance_poids_rarete(piece.rarete)
-        bonus = self.bonus_couleur.get(piece.couleur, 0.0)
+        bonus = self.bonus_couleur.get(piece.couleur.value, 0.0)
         return p * (1.0+bonus)
 
 

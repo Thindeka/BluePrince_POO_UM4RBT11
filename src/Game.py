@@ -25,6 +25,11 @@ class Game:
         # il faut qu il y ait une piece au depart a la position du joueur 
         x0, y0 = self.joueur.position
 
+        if not self.grille.deplacement_permis(x0,y0) :
+            x0 = self.grille.largeur // 2
+            y0 = self.grille.hauteur - 1
+            self.joueur.position = (x0, y0)
+
         if self.grille.get_piece(x0,y0) is None :
             from src.Piece2 import Piece2, FORME_CROIX 
             piece_a_placer = Piece2("départ", CouleurPiece.BLEU, FORME_CROIX)

@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Tuple
 import random
 
+from src.Porte import Porte
+
 if TYPE_CHECKING:
     from src.Joueur import Joueur
     from src.Inventaire import Inventaire  # si tu l’annotes aussi

@@ -13,7 +13,7 @@ OPPOSE = {"N" : "S", "S" : "N", "E" : "O", "O" : "E"}
 
 
 # énumération
-class CouleurPiece :
+class CouleurPiece(Enum) :
     JAUNE = auto()  # -> 1
     VERT = auto()   # -> 2 ...
     VIOLET = auto()
@@ -61,14 +61,14 @@ FORME_ANGLE_ON = FormePiece("angle_on", {"O", "N"})
 class Piece2 :
 
     nom : str
-    couleur : int
+    couleur : CouleurPiece
     forme : FormePiece
     cout_gemmes : int = 0   # cout en gemmes a deoenser pour tirer la piece
     rarete : int = 0  # influence proba de tirer une piece
     # image (a voir apres)
 
 
-    def __init__(self, nom: str, couleur : int, forme : FormePiece, cout_gemmes=0, rarete=0) -> None:
+    def __init__(self, nom: str, couleur : CouleurPiece, forme : FormePiece, cout_gemmes=0, rarete=0) -> None:
         self.nom = nom
         self.couleur = couleur
         self.forme = forme
@@ -102,7 +102,10 @@ class Piece2 :
             new_x, new_y = grille.voisin(x, y, d)  # case voisinne dans direction demandée
             # ignorer ce voisin car il est hors bornes
 
-            voisin = grille.deplacement_permis(new_x, new_y)
+            if not grille.deplacement_permis(new_x, new_y) :
+                continue
+
+            voisin = grille.get_piece(new_x, new_y)
             if voisin is None :
                 continue ########### à completer comportement plus tard par grille.piece_at()
 
@@ -126,7 +129,7 @@ class Piece2 :
                 continue # on ne place pas de porte la ou on ne peut pas
 
             porte = grille.garantie_porte(x, y, d)
-            voisin = grille.get_piece(x,y)
+            voisin = grille.get_piece(new_x, new_y)
 
             if isinstance(voisin, Piece2) and voisin.a_porte(OPPOSE[d]) :
                 porte.ouverte = True   # j ouvre la porte de al case courante 
