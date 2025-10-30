@@ -158,7 +158,7 @@ class Grille :
         if not self.deplacement_permis(new_x, new_y) :   ### déplacement non permis (bords)
             return False, False, 0
 
-        # porte séparant (x,y) et (new_x, new)
+        # porte séparant (x,y) et (new_x, new_y)
         porte = self.garantie_porte(x, y, d)
 
         if not porte.ouverte :    # porte fermee
@@ -179,6 +179,12 @@ class Grille :
             return True, False, 1
         
         return False, True, 0
+
+    def objets_a_position(self, x, y):
+        piece = self.pieces[y][x]
+        if piece:
+            return piece.objets
+        return []
 
 
 

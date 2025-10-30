@@ -22,7 +22,7 @@ class Pioche :
         # ajouter d'autres pièces et probabilités ici
         return objets
 
-    def tirage_3_pieces():
+    def tirage_3_pieces(self):
         """Tire 3 pièces aléatoires (à mettre dans Pioche)."""
         pieces_possibles = ["Veranda", "Maid's Chamber", "Furnace", "Greenhouse", "Solarium", "Den"]
         return random.choices(pieces_possibles, k=3)

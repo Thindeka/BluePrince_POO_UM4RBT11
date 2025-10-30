@@ -6,7 +6,6 @@ import sys
 from src.Game import Game
 from ui.input_handler import InputHandler
 from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
-#from src.constantes import TAILLE_CELLULE, HUD_H, MARGE, DIRECTIONS, COLOR_CELL
 from ui.renderer import render_grille, render_hud, render_piece
 
 

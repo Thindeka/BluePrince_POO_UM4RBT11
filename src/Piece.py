@@ -43,6 +43,7 @@ class Piece :
         self._cout = cout
         self._porte = porte
         self.objets: list[AutreObjet | ObjetPermanent | Coffre | Casier | EndroitCreuser] = []
+        self.initialiser_contenu()
         ### à quel moment définir les pièces disponibles et leur probabilité de tirage ?
         self._pieces_disponibles = [] ### définir les pièces disponibles dans le manoir
         # Chaque incrément du niveau de rareté doit diviser par trois la probabilité de tirer la pièce.
@@ -53,6 +54,18 @@ class Piece :
         """Définir l'intéraction du joueur avec la pièce : contenu de celle-ci"""
         """Définir une pioche"""
     
+    def initialiser_contenu(self):
+        """Ajoute du contenu aléatoire à la pièce."""
+        tirage = random.random()
+        if tirage < 0.3:
+            self.objets.append(Coffre())
+        elif tirage < 0.5:
+            self.objets.append(Casier())
+        elif tirage < 0.6:
+            self.objets.append(EndroitCreuser())
+        elif tirage < 0.8:
+            self.objets.append(AutreObjet(nom="gemme", effet="bonus")) # 20 % des pièces vides
+
     def random_tirage(self):
         """Tirage aléatoire de pièces
         Doit vérifier la rareté, le coût en gemmes (au moins 1 pièce = 0) et la condition de placement
@@ -77,7 +90,7 @@ class Piece :
         for obj in self.objets:
             if isinstance(obj, AutreObjet):
                 obj.appliquer(inv)
-                messages.append(obj.nom)
+                messages.append(f"Objet ramassé : {obj.nom}")
             elif isinstance(obj, (Coffre, Casier, EndroitCreuser)):
                 pass
         return messages
