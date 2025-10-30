@@ -30,6 +30,8 @@ def render_grille(ecran, game):
                     couleur = (200, 200, 50)
                     pygame.draw.circle(ecran, couleur, (sx + 10 + i * 12, sy + 10), 4)
 
+    print("Position joueur :", game.joueur.position)
+
     # Dessine le joueur
     if hasattr(game, "joueur"):
         x, y = game.joueur.position
