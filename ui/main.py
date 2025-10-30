@@ -4,9 +4,9 @@
 import pygame
 import sys
 from src.Game import Game
+from src.Grille import DIRECTIONS
 from ui.input_handler import InputHandler
 from src.AutreObjet import Pomme, Banane, Gateau, Sandwich, Repas, Coffre, Casier, EndroitCreuser
-#from src.constantes import TAILLE_CELLULE, HUD_H, MARGE, DIRECTIONS, COLOR_CELL
 from ui.renderer import render_grille, render_hud, render_piece
 
 
@@ -59,44 +59,72 @@ def main() :
         
         actions = input_handler.actions()
 
+    
         # SORTIE DU JEU
-        if input_handler.get_quit :  
+        if input_handler.quit_requested :  
             running = False
             break
 
+
+        
         # EXECUTER LES ACTIONS DEMANDEES
+
+        if game.state == "exploration" :
+            if "deplacer" in actions :
+                dx, dy = actions["deplacer"]
+                game.handle_deplacement(dx, dy)
+
+        
+        elif game.state == "tirage" :
+            if "deplacer" in actions :
+                dx, dy = actions["deplacer"]
+                
+                if dx == -1 :  # gauche
+                    game.handle_choix_tirage(-1)
+
+                if dx == 1 :
+                    game.handle_choix_tirage(1)
+
+            if 'confirmer' in actions :
+                game.handle_confirmation_tirage()
+
+            if 'relancer_tirage' in actions :
+                game.handle_confirmation_tirage()
+
+
+
+        """
         if 'deplacer' in actions:
-            dx, dy = actions['deplacer']
-            msg = game.deplacer_joueur({k for k,v in DIRECTIONS.items() if v==(dx,dy)}.pop())
-            if "nouvelle pièce" in msg:
-                game.state = "tirage" # il y aura l'écran de tirage qui s'affiche à ce moment
+                dx, dy = actions['deplacer']
+                msg = game.deplacer_joueur({k for k,v in DIRECTIONS.items() if v==(dx,dy)}.pop())
+                if "nouvelle pièce" in msg:
+                    game.state = "tirage" # il y aura l'écran de tirage qui s'affiche à ce moment
 
-        if actions.get('ouvrir'):
-            # Exemple : ouvrir un coffre à côté du joueur
-            for objet in game.grille.pieces[game.joueur.position[1]][game.joueur.position[0]]:
-                if isinstance(objet, (Coffre, Casier)):
-                    print(game.ouvrir_coffre(objet))
+            if actions.get('ouvrir'):
+                # Exemple : ouvrir un coffre à côté du joueur
+                for objet in game.grille.pieces[game.joueur.position[1]][game.joueur.position[0]]:
+                    if isinstance(objet, (Coffre, Casier)):
+                        print(game.ouvrir_coffre(objet))
 
-        if actions.get('creuser'):
-            for objet in game.grille.pieces[game.joueur.position[1]][game.joueur.position[0]]:
-                if isinstance(objet, EndroitCreuser):
-                    print(game.creuser_endroit(objet))
+            if actions.get('creuser'):
+                for objet in game.grille.pieces[game.joueur.position[1]][game.joueur.position[0]]:
+                    if isinstance(objet, EndroitCreuser):
+                        print(game.creuser_endroit(objet))
 
-        if actions.get('relancer_tirage') and game.state == "tirage":
-            print(game.tirer_nouvelle_piece())
-        if actions.get('confirmer') and game.state == "tirage":
-            print(game.tirer_nouvelle_piece())
-
+            if actions.get('relancer_tirage') and game.state == "tirage":
+                print(game.tirer_nouvelle_piece())
+            if actions.get('confirmer') and game.state == "tirage":
+                print(game.tirer_nouvelle_piece())
+    """
+        
         ecran.fill(COLOR_BG)
-
-        ecran.fill((10, 10, 10))
-        render_grille(ecran, game)
-        render_hud(ecran, game)
+        #render_grille(ecran, game)
+        #render_hud(ecran, game)
         pygame.display.flip()
 
-        clock.tick(30)
+        clock.tick(FPS)
 
-    pygame.quit()
+    #pygame.quit()
 
         # quit avant voir la compatibilité des deux prop
         # suite de ce code avec CHATGPT (à voir si c'est compatible)

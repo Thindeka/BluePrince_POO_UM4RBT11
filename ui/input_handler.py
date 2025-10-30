@@ -27,7 +27,7 @@ class InputHandler :
     
 
     @property
-    def get_quit(self) -> bool :
+    def quit_requested(self) -> bool :
         """ getter self._quit """
         return self._quit
     
