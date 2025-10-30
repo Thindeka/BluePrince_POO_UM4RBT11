@@ -1,6 +1,7 @@
 # fonctions d'affichage
 from __future__ import annotations
 import pygame
+import os 
 
 from typing import TYPE_CHECKING
 
@@ -24,6 +25,16 @@ class Renderer :
     def __init__(self) -> None:
         self.petite_police = pygame.font.SysFont(None, 20)
         self.moyenne_police = pygame.font.SysFont(None, 25)
+        self.images_pieces = {}  # nom_piece -> pygame.Surface
+        self.load_images()
+    
+    def load_images(self):
+        folder = "assets/images_pieces"
+        for filename in os.listdir(folder):
+            if filename.endswith((".png", ".jpg")):
+                name = os.path.splitext(filename)[0]  # "Entrance", "Antechamber", etc.
+                path = os.path.join(folder, filename)
+                self.images_pieces[name] = pygame.image.load(path).convert_alpha()
 
     def render (self, ecran, game :'Game') :
         ecran.fill((0,0,0))
@@ -103,12 +114,16 @@ class Renderer :
                 # si pièce présente, on la dessine
                 piece = grille.get_piece(x, y)
                 if piece is not None:
-                    # couleur selon la couleur de la pièce
-                    col = self._color_for_piece(piece)
-                    pygame.draw.rect(ecran, col, (px + 4, py + 4, TAILLE_CELLULE - 8, TAILLE_CELLULE - 8))
-                    # nom (petit)
-                    txt = self.petite_police.render(piece.nom[:10], True, (0, 0, 0))
-                    ecran.blit(txt, (px + 6, py + 6))
+                    img = self.images_pieces.get(piece.nom)
+                    if img:
+                        ecran.blit(pygame.transform.scale(img, (TAILLE_CELLULE, TAILLE_CELLULE)), (px, py))
+                    else:
+                        # couleur selon la couleur de la pièce
+                        col = self._color_for_piece(piece)
+                        pygame.draw.rect(ecran, col, (px + 4, py + 4, TAILLE_CELLULE - 8, TAILLE_CELLULE - 8))
+                        # nom (petit)
+                        txt = self.petite_police.render(piece.nom[:10], True, (0, 0, 0))
+                        ecran.blit(txt, (px + 6, py + 6))
 
                 # contour
                 pygame.draw.rect(ecran, (60, 60, 90), (px, py, TAILLE_CELLULE, TAILLE_CELLULE), width=1)
@@ -168,6 +183,12 @@ class Renderer :
         py = HUD_H + MARGE + y * TAILLE_CELLULE + TAILLE_CELLULE // 2
         pygame.draw.circle(ecran, (240, 240, 240), (px, py), TAILLE_CELLULE // 3)
 
+        piece = game.grille.get_piece(x, y)
+        if piece:
+            if piece.nom == "Antechamber":  # end game
+                game.state = "victoire"
+            elif piece.nom == "Entrance":   # start game
+                pass
     
     ######### FOCNTIONS AUXILIAIRES
 
