@@ -24,7 +24,25 @@ class CouleurPiece(Enum) :
     ROUGE = auto()
     BLEU = auto()
 
+class JaunePiece(Enum) :
+    COMMISSARIAT = auto()
+    CUISINE = auto()
+    SERRURERIE = auto()
+    SALLE_EXPO = auto()
+    BUANDERIE = auto()
+    LIBRAIRIE = auto()
+    ARMURERIE = auto()
+    BOUTIQUE_CADEAUX = auto()
 
+class VertPiece(Enum) :
+    TERASSE = auto()
+    PATIO = auto()
+    COUR_INTERIEURE = auto()
+    CLOITRE = auto()
+    VERANDA = auto()
+    SERRE = auto()
+    SALON_MATINAL = auto()
+    JARDIN_SECRET = auto()
 
 class FormePiece :
     """ correspond a l meplacement des portes de la piece """
@@ -60,14 +78,22 @@ FORME_ANGLE_ES = FormePiece("angle_es", {"E", "S"})
 FORME_ANGLE_SO = FormePiece("angle_so", {"S", "O"})
 FORME_ANGLE_ON = FormePiece("angle_on", {"O", "N"})
 
+# T
+FORME_T_NES = FormePiece("t_nes", {"N", "E", "S"})
+FORME_T_ESO = FormePiece("t_eso", {"E", "S", "O"})
+FORME_T_SON = FormePiece("t_son", {"S", "O  ", "N"})
+FORME_T_ONE = FormePiece("t_one", {"O", "N", "E"})
+
 
 class Piece2 :
 
     nom : str
     couleur : CouleurPiece
+    jaune : JaunePiece  # uniquement pour les pieces jaunes (magasins)
+    vert : VertPiece  # uniquement pour les pieces vertes (jardins)
     forme : FormePiece
     cout_gemmes : int = 0   # cout en gemmes a deoenser pour tirer la piece
-    rarete : int = 0  # influence proba de tirer une piece
+    rarete : int = 0  # influence proba de tirer une piece, (0 à 3) : (commonplace, standard, unusual, rare)
     # image (a voir apres)
 
 
@@ -154,25 +180,174 @@ class Piece2 :
         # JAUNE = MAGASIN = ECHANGER OR PAR OBJETS
         if self.couleur is CouleurPiece.JAUNE :
             game.state = "achat"
-            game.contexte_achat = {
-                "piece" : self,
-                "produits" : [
-                    ("clé", 3, "cle"),
-                    ("dé", 4, "de"),
+            if self.jaune is JaunePiece.COMMISSARIAT :
+                self.forme is FORME_ANGLE_SO
+                self.rarete is 1
+                self.cout_gemmes is 1
+                produits_base = [     
+                    ("gemmes", 3, "gemmes"),
                     ("pelle", 6, "pelle"),
-                ],
-            }
-            return 
+                    ("marteau", 8, "marteau"),
+                    ("détecteur_metaux", 10, "detecteur_metaux"),
+                    ("gemmes", 10, "gemmes", 4), ### à vérifier
+                    ("clé", 10, "cles")
+                ]
+                produits_tirage = [random.choice(produits_base) for i in range(4)]
+                game.contexte_achat = {
+                "piece" : self,
+                "produits" : produits_tirage
+                }
+                return
+            if self.jaune is JaunePiece.CUISINE :
+                self.forme is FORME_ANGLE_SO
+                self.rarete is 0
+                self.cout_gemmes is 1
+                contenu_possible = [
+                    None, 
+                    ("cles", 1), 
+                    ("gemmes", 1), 
+                    ("pieceOr", 2), 
+                    ("pieceOr", 3), 
+                    ("pieceOr", 5)
+                ]
+                contenu_tirage = random.choice(contenu_possible)
+                if contenu_tirage is not None :
+                    objet, quantite = contenu_tirage
+                    if objet == "cles" :
+                        inv.ramasser_cles(quantite)
+                    elif objet == "gemmes" :
+                        inv.ramasser_gemmes(quantite)
+                    elif objet == "pieceOr" :
+                        inv.ramasser_pieceOr(quantite)
 
-
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                        ("banane", 2, "banane"),
+                        ("sandwich", 8, "sandwich"),
+                    ]
+                    }
+                
+                return
+            if self.jaune is JaunePiece.SERRURERIE :
+                self.forme is FORME_IMPASSE_S
+                self.rarete is 2
+                self.cout_gemmes is 1
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                        ("clé", 5, "cles"),
+                        ("clé", 12, "cles", 3),
+                        ("kit_crochetage", 10, "kit_crochetage"), # info : special keys ou master keys non défini
+                    ]
+                    }
+                return 
+            if self.jaune is JaunePiece.SALLE_EXPO :
+                self.forme is FORME_COULOIR_NS
+                self.rarete is 3
+                self.cout_gemmes is 2
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                    # info : aucun objet ne ces objets n'a été défini
+                    ]
+                    }
+                return
+            if self.jaune is JaunePiece.BUANDERIE : # propose des services : particulier à coder
+                self.forme is FORME_IMPASSE_S
+                self.rarete is 3
+                self.cout_gemmes is 1
+                contenu_possible = [
+                    None, 
+                    ("cles", 1),
+                    ("pieceOr", 1)
+                    ("pieceOr", 2), 
+                    ("pieceOr", 3),
+                    ("pieceOr", 4)
+                    ("pieceOr", 5)
+                    ("pieceOr", 6)
+                ]
+                contenu_tirage = random.choice(contenu_possible)
+                if contenu_tirage is not None :
+                    objet, quantite = contenu_tirage
+                    if objet == "cles" :
+                        inv.ramasser_cles(quantite)
+                    elif objet == "pieceOr" :
+                        inv.ramasser_pieceOr(quantite)
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                    # info : 
+                    ]
+                    }
+                return
+            if self.jaune is JaunePiece.LIBRAIRIE :
+                self.forme is FORME_ANGLE_SO
+                self.rarete is 3
+                self.cout_gemmes is 1
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                    # livres : optionnels
+                    ]
+                    }
+                return
+            if self.jaune is JaunePiece.ARMURERIE :
+                self.forme is FORME_ANGLE_SO
+                self.rarete is 1
+                self.cout_gemmes is 0
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                    # objetsperm non définis
+                    ]
+                    }
+                return
+            if self.jaune is JaunePiece.BOUTIQUE_CADEAUX :
+                self.forme is FORME_T_ESO
+                self.rarete is 3
+                self.cout_gemmes is 0
+                game.contexte_achat = {
+                    "piece" : self,
+                    "produits" : [
+                    # objetsperm non définis
+                    ]
+                    }
+                return
+            
         # VERT = JARDIN = CONTIENT GEMMES/ENDROITS_CREUSER/OBJ_PERM
         if self.couleur is CouleurPiece.VERT :
-
+            if self.vert is VertPiece.TERASSE :
+                self.forme is FORME_IMPASSE_S
+                self.rarete is 1
+                self.cout_gemmes is 0
+                contenu_possible = [
+                    None, 
+                    ("banane", 1),
+                    ("orange", 1)
+                    ("gemmes", 1), 
+                    ("gemmes", 2),
+                    ("pelle")
+                ]
+                contenu_tirage = random.choice(contenu_possible)
+                if contenu_tirage is not None :
+                    objet, quantite = contenu_tirage
+                    if objet == "banane" :
+                        inv.banane(quantite)
+                    elif objet == "orange" :
+                        inv.banane(quantite)
+                    elif objet == "gemmes" :
+                        inv.ramasser_gemmes(quantite)
+                    elif objet == "pelle" :
+                        from src.ObjetPermanent import Pelle
+                        inv.ajouter_obj_permanent(Pelle())
+                    #### To be continued ######
+                    
             inv.ramasser_gemmes(1) # contient souvent gemmes
 
             # contient parfois endroit a creuser
             if random.random() < 0.50 :
-                if inv.peut_creuser() :
+                if inv.peut_creuser() : ### ajouter une condition supp : joueur possède détecteur de métaux ?
                     inv.ramasser_pieceOr(1)
 
             if random.random() < 0.20 :
