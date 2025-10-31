@@ -47,7 +47,7 @@ class Game:
         if self.state != "exploration" :
             return  # deplacement impossible car on est pas en exploration
         
-        deplacement, ouverture, pas_consommes = self.grille.deplacer_joueur(self.joueur, self.inv, dx, dy)
+        deplacement, ouverture, pas_consommes = self.grille.deplacer_joueur(self.joueur, self.inv, dx, dy) #  booeleens 
 
         if deplacement :
             if pas_consommes :

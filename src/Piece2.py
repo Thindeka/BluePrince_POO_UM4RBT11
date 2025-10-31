@@ -210,23 +210,6 @@ class Piece2 :
 
         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def effet_tirage (self, game) -> None :
         # a completer 
         return 

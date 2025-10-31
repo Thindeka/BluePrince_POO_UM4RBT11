@@ -108,6 +108,7 @@ class Grille :
         return random.choices([0, 1, 2], weights=[p0, p1, p2])[0]
 
 
+
     def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> 'Porte' :
         """ Retourne la porte demandée (et son mirroir) en s'assurant qu'elle existe bien avant de l'utiliser
         Initialisation paresseuse
@@ -180,6 +181,7 @@ class Grille :
             return True, False, 1
         
         return False, True, 0
+
 
     def objets_a_position(self, x, y):
         piece = self.pieces[y][x]

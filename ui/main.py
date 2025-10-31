@@ -67,13 +67,14 @@ def main() :
 
             if 'annuler' in actions :
                 pass
-
+            
+            # AJOUTER ACTION ACHAT
 
         # affichage
         renderer.render(ecran, game)
         pygame.display.flip()  # on eneregistre les changememts
 
-        clock.tick(FPS)
+        clock.tick(FPS)   
     
     pygame.quit()
 

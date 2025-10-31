@@ -190,12 +190,13 @@ class Renderer :
             elif piece.nom == "Entrance":   # start game
                 pass
     
+    
     ######### FOCNTIONS AUXILIAIRES
 
     def render_piece(ecran, piece, position):
         """(Optionnel) Affiche une pièce individuelle — utile pour debug."""
         x, y = position
-        sx, sy = coords_to_px(x, y)
+        sx, sy = piece.coords_to_px(x, y)
         rect = pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE)
         pygame.draw.rect(ecran, (100, 100, 255), rect, 2)
 
