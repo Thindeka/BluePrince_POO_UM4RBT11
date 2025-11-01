@@ -20,3 +20,6 @@ class Porte :
     def niveau (self) :
         """ getter de l'attribut statut """
         return self.__niveau
+    
+    def set_niveau (self, n : int) :
+        self.__niveau = n

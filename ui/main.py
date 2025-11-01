@@ -44,12 +44,19 @@ def main() :
         # EXECUTER LES ACTIONS DEMANDEES
 
         if game.state == "exploration" :
+
             if "deplacer" in actions :
                 dx, dy = actions["deplacer"]
                 game.handle_deplacement(dx, dy)
 
+            if "ouvrir" in actions:
+                game.handle_ouvrir_sur_piece_courante()
+                
+            if "creuser" in actions :
+                game.handle_ouvrir_sur_piece_courante()
+
         
-        elif game.state == "tirage" :
+        if game.state == "tirage" :
             if "deplacer" in actions :
                 dx, dy = actions["deplacer"]
                 
@@ -69,6 +76,17 @@ def main() :
                 pass
             
             # AJOUTER ACTION ACHAT
+
+        elif game.state == "shop":
+            # ENTER : acheter l'offre sélectionnée
+            if "confirmer" in actions :
+                game.handle_shop_confirm()
+
+            # ESC : quitter le shop
+            if "annuler" in actions :
+                # on revient à l'exploration
+                game.state = "exploration"
+                game.contexte_achat = None
 
         # affichage
         renderer.render(ecran, game)

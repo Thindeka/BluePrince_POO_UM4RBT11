@@ -1,239 +1,301 @@
-# fonctions d'affichage
 from __future__ import annotations
-import pygame
-import os 
+# ui/renderer.py
 
 from typing import TYPE_CHECKING
 
-
-if TYPE_CHECKING :
+if TYPE_CHECKING:
     from src.Game import Game
-    from src.Piece2 import Piece2
+
+import os
+import pygame
+
+CELL = 64  # taille d'une case de la grille
+OFFSET_X = 20
+OFFSET_Y = 120
 
 
-# Valeurs reprises du main
-TAILLE_CELLULE = 64
-MARGE = 20
-HUD_H = 50
-COLOR_CELL = (26, 28, 35)
-COLOR_JOUEUR = (220, 220, 255)
-
-
-
-class Renderer :
-    
+class Renderer:
     def __init__(self) -> None:
-        self.petite_police = pygame.font.SysFont(None, 20)
-        self.moyenne_police = pygame.font.SysFont(None, 25)
-        self.images_pieces = {}  # nom_piece -> pygame.Surface
-        self.load_images()
-    
-    def load_images(self):
-        folder = "assets/images_pieces"
-        for filename in os.listdir(folder):
-            if filename.endswith((".png", ".jpg")):
-                name = os.path.splitext(filename)[0]  # "Entrance", "Antechamber", etc.
-                path = os.path.join(folder, filename)
-                self.images_pieces[name] = pygame.image.load(path).convert_alpha()
+        pygame.font.init()
+        self.font_title = pygame.font.SysFont("Arial", 22, bold=True)
+        self.font = pygame.font.SysFont("Arial", 18)
+        self.small = pygame.font.SysFont("Arial", 14)
 
-    def render (self, ecran, game :'Game') :
-        ecran.fill((0,0,0))
-        self.render_grille(ecran, game)   # afficher grille
-        self.render_joueur(ecran, game)  # afficher joueur
-        self.render_hud(ecran, game)  # afficher hud
+        # cache d'images pour ne pas recharger à chaque frame
+        self.images_cache: dict[tuple[str, int], pygame.Surface] = {}
+        # dossier où tu as mis tes images
+        self.dir_images = os.path.join("assets", "images_pieces")
 
-        if game.state == "tirage" and game.tirage_en_cours :
+    # ----------------------------------------------------------
+    # point d'entrée
+    # ----------------------------------------------------------
+    def render(self, ecran: pygame.Surface, game: "Game") -> None:
+        # fond global
+        ecran.fill((10, 10, 15))
+
+        # HUD en haut
+        self.render_hud(ecran, game)
+
+        # grille + joueur
+        self.render_grille(ecran, game)
+
+        # écrans en overlay selon l'état
+        if game.state == "tirage":
             self.render_ecran_tirage(ecran, game)
+        elif game.state == "shop":
+            self.render_shop(ecran, game)
+        elif game.state == "game_over":
+            self.render_game_over(ecran)
+        elif game.state == "victoire":
+            self.render_victoire(ecran)
 
-        if game.state == "game_over" :
-            self.render_texte_centre(ecran, "GAME OVER", (200, 50, 50))
-        elif game.state == "victoire" :
-            self.render_texte_centre(ecran, "VICTOIRE", (50, 200, 50))
+    # ----------------------------------------------------------
+    # HUD : ressources + piece actuelle
+    # ----------------------------------------------------------
+    def render_hud(self, ecran: pygame.Surface, game: "Game") -> None:
+        inv = game.inv
+        x, y = game.joueur.position
+        piece = game.grille.get_piece(x, y)
+
+        # fond du HUD
+        pygame.draw.rect(ecran, (25, 25, 35), (0, 0, ecran.get_width(), 110))
+
+        # titre
+        titre = self.font_title.render("Blue Prince (version POO)", True, (240, 240, 240))
+        ecran.blit(titre, (15, 8))
+
+        # inventaire de base
+        txt = (
+            f"Pas: {inv.pas}   Or: {inv.piecesOr}   Gemmes: {inv.gemmes}   "
+            f"Clés: {inv.cles}   Dés: {inv.des}"
+        )
+        surf = self.font.render(txt, True, (230, 230, 230))
+        ecran.blit(surf, (15, 40))
+
+        # objets permanents
+        y_perm = 65
+        if inv.noms_objets_permanents:
+            txt_perm = "Objets permanents: " + ", ".join(sorted(inv.noms_objets_permanents))
+        else:
+            txt_perm = "Objets permanents: (aucun)"
+        ecran.blit(self.small.render(txt_perm, True, (200, 200, 200)), (15, y_perm))
+
+        # autres objets (pomme, etc.)
+        y_autres = y_perm + 18
+        if inv.autres_objets:
+            noms = [o.nom for o in inv.autres_objets]
+            txt_autres = "Objets: " + ", ".join(noms)
+        else:
+            txt_autres = "Objets: (aucun)"
+        ecran.blit(self.small.render(txt_autres, True, (200, 200, 200)), (15, y_autres))
+
+        # pièce actuelle
+        if piece is not None:
+            nom_piece = piece.nom
+            txt_piece = f"Pièce actuelle : {nom_piece}  (x={x}, y={y})"
+        else:
+            txt_piece = f"Aucune pièce (x={x}, y={y})"
+        ecran.blit(self.small.render(txt_piece, True, (180, 220, 255)), (400, 40))
+
+        # état du jeu
+        ecran.blit(self.small.render(f"État: {game.state}", True, (240, 180, 120)), (400, 60))
+
+    # ----------------------------------------------------------
+    # rendu principal de la grille
+    # ----------------------------------------------------------
+    def render_grille(self, ecran: pygame.Surface, game: "Game") -> None:
+        grille = game.grille
+        sortie_x, sortie_y = grille.sortie 
+
+        for gy in range(grille.hauteur):
+            for gx in range(grille.largeur):
+                px = OFFSET_X + gx * CELL
+                py = OFFSET_Y + gy * CELL
+
+                # fond de case
+                pygame.draw.rect(ecran, (25, 28, 45), (px, py, CELL, CELL))
+                pygame.draw.rect(ecran, (50, 50, 70), (px, py, CELL, CELL), 1)
+
+                piece = grille.get_piece(gx, gy)
+
+                if gx == sortie_x and gy == sortie_y:
+                    self._render_antechamber(ecran, px, py)
+
+                if piece is not None:
+                    self._render_piece_image(ecran, piece, px, py)
+                # portes par-dessus
+                portes_case = grille.dict_portes(gx, gy)
+                self._render_portes_case(ecran, px, py, CELL, portes_case)
+
+        # dessiner le joueur par-dessus tout
+        jx, jy = game.joueur.position
+        jpx = OFFSET_X + jx * CELL + CELL // 2
+        jpy = OFFSET_Y + jy * CELL + CELL // 2
+        pygame.draw.circle(ecran, (245, 245, 245), (jpx, jpy), CELL // 3)
+
+    def _render_antechamber(self, ecran: pygame.Surface, px: int, py: int) -> None:
+        """
+        Dessine l'antichambre, même si la grille n'a pas encore de pièce ici.
+        """
+        filename = "Antechamber.png"
+        path = os.path.join(self.dir_images, filename)
+
+        if os.path.exists(path):
+            key = (filename, CELL)
+            if key not in self.images_cache:
+                img = pygame.image.load(path).convert_alpha()
+                img = pygame.transform.smoothscale(img, (CELL, CELL))
+                self.images_cache[key] = img
+            ecran.blit(self.images_cache[key], (px, py))
+        else:
+            # fallback si jamais le fichier n'existe pas
+            pygame.draw.rect(ecran, (180, 150, 60), (px + 2, py + 2, CELL - 4, CELL - 4))
+            ecran.blit(self.small.render("ANTICH", True, (0, 0, 0)), (px + 4, py + 4))
 
 
-    def render_ecran_tirage(self, ecran : pygame.Surface, game : 'Game'):
-        
+
+    # ----------------------------------------------------------
+    # dessine UNE pièce (image ou fallback)
+    # ----------------------------------------------------------
+    def _render_piece_image(self, ecran: pygame.Surface, piece, px: int, py: int) -> None:
+        filename = piece.nom.replace(" ", "_") + ".png"
+        path = os.path.join(self.dir_images, filename)
+
+        if os.path.exists(path):
+            key = (filename, CELL)
+            if key not in self.images_cache:
+                img = pygame.image.load(path).convert_alpha()
+                img = pygame.transform.smoothscale(img, (CELL, CELL))
+                self.images_cache[key] = img
+            ecran.blit(self.images_cache[key], (px, py))
+        else:
+            # fallback si pas d’image
+            pygame.draw.rect(ecran, (210, 210, 210), (px + 2, py + 2, CELL - 4, CELL - 4))
+            short = piece.nom[:12]
+            ecran.blit(self.small.render(short, True, (0, 0, 0)), (px + 4, py + 4))
+
+    # ----------------------------------------------------------
+    # rendu des portes d'une case
+    # portes: dict[str, Porte]
+    # ----------------------------------------------------------
+    def _render_portes_case(self, ecran, px, py, cell, portes: dict) -> None:
+        # épaisseur
+        th = 5
+        for d, porte in portes.items():
+            # couleur selon état
+            if porte.ouverte:
+                col = (0, 220, 0)  # vert
+            else:
+                if porte.niveau == 0:
+                    col = (240, 240, 0)   # jaune
+                elif porte.niveau == 1:
+                    col = (255, 140, 0)   # orange
+                else:
+                    col = (220, 0, 0)     # rouge
+
+            if d == "N":
+                pygame.draw.rect(ecran, col, (px + 8, py, cell - 16, th))
+                if not porte.ouverte and porte.niveau > 0:
+                    txt = self.small.render(str(porte.niveau), True, (255, 255, 255))
+                    ecran.blit(txt, (px + cell // 2 - 4, py + 2))
+            elif d == "S":
+                pygame.draw.rect(ecran, col, (px + 8, py + cell - th, cell - 16, th))
+                if not porte.ouverte and porte.niveau > 0:
+                    txt = self.small.render(str(porte.niveau), True, (255, 255, 255))
+                    ecran.blit(txt, (px + cell // 2 - 4, py + cell - th - 12))
+            elif d == "E":
+                pygame.draw.rect(ecran, col, (px + cell - th, py + 8, th, cell - 16))
+                if not porte.ouverte and porte.niveau > 0:
+                    txt = self.small.render(str(porte.niveau), True, (255, 255, 255))
+                    ecran.blit(txt, (px + cell - th - 2, py + cell // 2 - 6))
+            elif d == "O":
+                pygame.draw.rect(ecran, col, (px, py + 8, th, cell - 16))
+                if not porte.ouverte and porte.niveau > 0:
+                    txt = self.small.render(str(porte.niveau), True, (255, 255, 255))
+                    ecran.blit(txt, (px + 2, py + cell // 2 - 6))
+
+    # ----------------------------------------------------------
+    # écran de tirage (state == "tirage")
+    # ----------------------------------------------------------
+    def render_ecran_tirage(self, ecran: pygame.Surface, game: "Game") -> None:
         data = game.tirage_en_cours
+        # sécurité
+        if not data:
+            return
 
-        if not data :
-            return 
-        
         pieces = data["pieces"]
         index = data["index"]
 
+        # overlay sombre
+        surf = pygame.Surface(ecran.get_size(), pygame.SRCALPHA)
+        surf.fill((0, 0, 0, 160))
+        ecran.blit(surf, (0, 0))
+
         w, h = ecran.get_size()
+        center_y = h // 2
+        center_x = w // 2
 
-        # fond semi-transparent
-        overlay = pygame.Surface((w, h), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))
-        ecran.blit(overlay, (0, 0))
-
-        card_w = 180
-        card_h = 120
-        gap = 20
-        total_w = len(pieces) * card_w + (len(pieces) - 1) * gap
-        start_x = (w - total_w) // 2
-        y = h // 2 - card_h // 2
-
+        # on dessine les 3 choix
+        spacing = 200
+        base_x = center_x - spacing
         for i, piece in enumerate(pieces):
-            x = start_x + i * (card_w + gap)
-            # cadre
-            color = (255, 255, 255)
-            if i == index:
-                color = (255, 220, 0)
-            pygame.draw.rect(ecran, color, (x, y, card_w, card_h), width=3)
+            px = base_x + i * spacing
+            py = center_y - 100
+            rect = pygame.Rect(px, py, 150, 150)
+
+            # fond
+            col = (90, 90, 120) if i != index else (160, 160, 220)
+            pygame.draw.rect(ecran, col, rect, border_radius=8)
+            pygame.draw.rect(ecran, (255, 255, 255), rect, 2, border_radius=8)
 
             # nom
-            name_surf = self.petite_police.render(piece.nom, True, (255, 255, 255))
-            ecran.blit(name_surf, (x + 10, y + 10))
+            ecran.blit(self.font.render(piece.nom, True, (10, 10, 10)), (px + 8, py + 8))
 
-            # coût
-            cost_surf = self.petite_police.render(f"{piece.cout_gemmes} gemme(s)", True, (220, 220, 220))
-            ecran.blit(cost_surf, (x + 10, y + 35))
-
-            # couleur
-            col_surf = self.petite_police.render(piece.couleur.name, True, (200, 200, 200))
-            ecran.blit(col_surf, (x + 10, y + 60))
+            # coût gemmes
+            if getattr(piece, "cout_gemmes", 0) > 0:
+                cg = piece.cout_gemmes
+                ecran.blit(self.small.render(f"Coût: {cg} gemme(s)", True, (0, 0, 0)), (px + 8, py + 35))
 
         # aide
-        help_surf = self.petite_police.render("←/→ pour choisir, Entrée pour valider, Espace pour relancer", True, (255, 255, 255))
-        ecran.blit(help_surf, (w // 2 - help_surf.get_width() // 2, y + card_h + 15))
+        aide = self.small.render("← / → pour choisir   Entrée pour valider   Espace pour relancer (si dé)", True, (255, 255, 255))
+        ecran.blit(aide, (w // 2 - aide.get_width() // 2, center_y + 90))
 
+    # ----------------------------------------------------------
+    # écran de shop
+    # ----------------------------------------------------------
+    def render_shop(self, ecran: pygame.Surface, game: "Game") -> None:
+        data = game.contexte_achat
+        if not data:
+            return
+        offres = data.get("offres", [])
 
-    def render_grille(self, ecran: pygame.Surface, game: 'Game') -> None:
-        
-        grille = game.grille
+        surf = pygame.Surface(ecran.get_size(), pygame.SRCALPHA)
+        surf.fill((0, 0, 0, 160))
+        ecran.blit(surf, (0, 0))
 
-        for y in range(grille.hauteur):
-            for x in range(grille.largeur):
-                px, py = self.coords_to_px(x, y)
-       
-                # fond de case
-                pygame.draw.rect(ecran, (30, 30, 50), (px, py, TAILLE_CELLULE   , TAILLE_CELLULE))
-
-                # si pièce présente, on la dessine
-                piece = grille.get_piece(x, y)
-                if piece is not None:
-                    img = self.images_pieces.get(piece.nom)
-                    if img:
-                        ecran.blit(pygame.transform.scale(img, (TAILLE_CELLULE, TAILLE_CELLULE)), (px, py))
-                    else:
-                        # couleur selon la couleur de la pièce
-                        col = self._color_for_piece(piece)
-                        pygame.draw.rect(ecran, col, (px + 4, py + 4, TAILLE_CELLULE - 8, TAILLE_CELLULE - 8))
-                        # nom (petit)
-                        txt = self.petite_police.render(piece.nom[:10], True, (0, 0, 0))
-                        ecran.blit(txt, (px + 6, py + 6))
-
-                # contour
-                pygame.draw.rect(ecran, (60, 60, 90), (px, py, TAILLE_CELLULE, TAILLE_CELLULE), width=1)
-
-
-    def render_hud(self, ecran : pygame.Surface, game : 'Game') -> None :
-        """Affiche les infos du joueur en haut """
-        inv = game.inv
-        pygame.draw.rect(ecran, (10, 10, 20), (0, 0, ecran.get_width(), HUD_H))
-        # texte
-        txt = self.petite_police.render(
-            f"Pas: {inv.pas}  |  Gemmes: {inv.gemmes}  |  Or: {inv.piecesOr}  |  Clés: {inv.cles}  |  Dés: {inv.des}",
-            True,
-            (230, 230, 230)
-        )
-        ecran.blit(txt, (MARGE, 20))
-
-        # état
-        state_txt = self.petite_police.render(f"État: {game.state}", True, (180, 180, 180))
-        ecran.blit(state_txt, (MARGE, 48))
-
-
-    def render_porte (self, ecran : pygame.Surface, game : 'Game') -> None :
-        # dessine les portes ouvertes 
-
-        grille = game.grille
-
-        for (x, y), dico in grille.portes.items() :
-            
-            x_bis, y_bis = self.coords_to_px(x,y)
-            
-            for d, porte in dico.items():
-                if not porte.ouverte:
-                    continue
-                if d == "N":
-                    pygame.draw.line(ecran, (200, 200, 0),
-                                     (x_bis + TAILLE_CELLULE // 2, y_bis),
-                                     (x_bis + TAILLE_CELLULE // 2, y_bis - 8), 3)
-                elif d == "S":
-                    pygame.draw.line(ecran, (200, 200, 0),
-                                     (x_bis + TAILLE_CELLULE // 2, y_bis + TAILLE_CELLULE),
-                                     (x_bis + TAILLE_CELLULE // 2, y_bis + TAILLE_CELLULE + 8), 3)
-                elif d == "E":
-                    pygame.draw.line(ecran, (200, 200, 0),
-                                     (x_bis + TAILLE_CELLULE, y_bis + TAILLE_CELLULE // 2),
-                                     (x_bis + TAILLE_CELLULE + 8, y_bis + TAILLE_CELLULE // 2), 3)
-                elif d == "O":
-                    pygame.draw.line(ecran, (200, 200, 0),
-                                     (x_bis, y_bis + TAILLE_CELLULE // 2),
-                                     (x_bis - 8, y_bis + TAILLE_CELLULE // 2), 3)
-                    
-
-    def render_joueur(self, ecran : pygame.Surface, game : 'Game') -> None :
-        # dessine le joueur
-        x, y = game.joueur.position
-        px = MARGE + x * TAILLE_CELLULE + TAILLE_CELLULE // 2
-        py = HUD_H + MARGE + y * TAILLE_CELLULE + TAILLE_CELLULE // 2
-        pygame.draw.circle(ecran, (240, 240, 240), (px, py), TAILLE_CELLULE // 3)
-
-        piece = game.grille.get_piece(x, y)
-        if piece:
-            if piece.nom == "Antechamber":  # end game
-                game.state = "victoire"
-            elif piece.nom == "Entrance":   # start game
-                pass
-    
-    
-    ######### FOCNTIONS AUXILIAIRES
-
-    def render_piece(ecran, piece, position):
-        """(Optionnel) Affiche une pièce individuelle — utile pour debug."""
-        x, y = position
-        sx, sy = piece.coords_to_px(x, y)
-        rect = pygame.Rect(sx, sy, TAILLE_CELLULE, TAILLE_CELLULE)
-        pygame.draw.rect(ecran, (100, 100, 255), rect, 2)
-
-    def _color_for_piece (self, piece : Piece2) -> tuple[int, int, int] :
-        
-        c = piece.couleur
-
-        if c == "JAUNE" : 
-            return (230, 220, 120)
-        
-        if c == "VERT" : 
-            return (100, 200, 120)
-        
-        if c == "VIOLET" : 
-            return (170, 120, 200)
-        
-        if c == "ORANGE" : 
-            return (230, 160, 80)
-        
-        if c == "ROUGE" : 
-            return (230, 80, 80)
-
-        if c == "BLEU" : 
-            return (120, 150, 255)
-        
-        return (200, 200, 200)
-
-
-    def render_texte_centre (self, ecran: pygame.Surface, text: str, color: tuple[int, int, int]) -> None: 
-        surf = self.moyenne_police.render(text, True, color)
         w, h = ecran.get_size()
-        ecran.blit(surf, (w // 2 - surf.get_width() // 2, h // 2 - surf.get_height() // 2))
+        box = pygame.Rect(w // 2 - 200, h // 2 - 150, 400, 300)
+        pygame.draw.rect(ecran, (40, 40, 60), box, border_radius=10)
+        pygame.draw.rect(ecran, (240, 240, 240), box, 2, border_radius=10)
 
+        ecran.blit(self.font.render("Magasin", True, (255, 255, 255)), (box.x + 20, box.y + 15))
+        ecran.blit(self.small.render("(O) pour acheter, ESC pour sortir", True, (220, 220, 220)), (box.x + 20, box.y + 45))
 
+        y = box.y + 80
+        for label, prix, code in offres:
+            ligne = f"{label} - {prix} or"
+            ecran.blit(self.font.render(ligne, True, (230, 230, 230)), (box.x + 20, y))
+            y += 35
 
-    def coords_to_px(self, x, y):
-        return (
-            MARGE + x * TAILLE_CELLULE,
-            HUD_H + MARGE + y * TAILLE_CELLULE,
-        )
+    # ----------------------------------------------------------
+    # écrans de fin
+    # ----------------------------------------------------------
+    def render_game_over(self, ecran: pygame.Surface) -> None:
+        w, h = ecran.get_size()
+        txt = self.font_title.render("GAME OVER", True, (255, 50, 50))
+        ecran.blit(txt, (w // 2 - txt.get_width() // 2, h // 2 - txt.get_height() // 2))
+
+    def render_victoire(self, ecran: pygame.Surface) -> None:
+        w, h = ecran.get_size()
+        txt = self.font_title.render("VICTOIRE !", True, (80, 255, 120))
+        ecran.blit(txt, (w // 2 - txt.get_width() // 2, h // 2 - txt.get_height() // 2))

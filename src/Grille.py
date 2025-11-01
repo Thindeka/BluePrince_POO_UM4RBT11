@@ -33,7 +33,7 @@ class Grille :
         self.__pieces = [[None for _ in range(self.__largeur)] for __ in range(self.__hauteur)]
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
         #self.sortie = (self.__largeur - 1, self.__hauteur - 1)
-        self.sortie = (3, 0)  # (x, y) => x=3, y=0
+        self.sortie = (2, 0)  # (x, y) => x=2, y=0
 
 
     @property
@@ -155,6 +155,12 @@ class Grille :
             return False, False, 0
 
         x,y = joueur.position
+        piece_actuelle  = self.get_piece(x,y)
+        
+        if piece_actuelle is not None and not piece_actuelle.a_porte(d):
+            # pas de porte dans cette direction → on ne tente même pas
+            return False, False, 0
+
         new_x, new_y = self.voisin(x, y, d)
 
         if not self.deplacement_permis(new_x, new_y) :   ### déplacement non permis (bords)
@@ -166,21 +172,25 @@ class Grille :
         if not porte.ouverte :    # porte fermee
             
             if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
+                print("Porte niveau", porte.niveau, "NON OUVERTE (pas de ressource)")
                 return False, False, 0
+            else:
+                print("Porte niveau", porte.niveau, "OUVERTE")
+
             
             porte.ouverte = True  # la porte peut etre ouverte
             self.dict_portes(new_x, new_y)[OPPOSE[d]].ouverte = True
 
             # il faut assurer coherence entre les deux cases opposées pour garantir que l'on puisse faire des aller-retour sans consommer de ressources davantage
             # il faut faire le tirage aleatoire d piece si le côté opposé est vide
-            if self.__pieces[new_y][new_x] is None :
+            if self.get_piece(new_x, new_y) is None :
                 return False, True, 0
         
-        if self.__pieces[new_y][new_x] is not None :
+        if self.get_piece(new_x, new_y) is not None :
             joueur.deplacer_coords((new_x-x, new_y-y), self)
-            return True, False, 1
+            return True, False, 1  # porte ouverte et si piece existe => deplacement
         
-        return False, True, 0
+        return False, True, 0  # porte ouverte mais pas de piece => tirage 
 
 
     def objets_a_position(self, x, y):

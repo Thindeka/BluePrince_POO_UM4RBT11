@@ -137,13 +137,17 @@ class Inventaire :
 
 
  
-    def ajouter_obj_permanent (self, obj_perm : 'ObjetPermanent') -> bool :   # wrapper 
-        """ Ajoute objet permanent à l'inventaire si pas présent 
-        ne fait rien si objet deja present 
+    def ajouter_obj_permanent (self, obj_perm : 'ObjetPermanent') -> None :   # wrapper 
         """
-        present = obj_perm.nom in self.noms_objets_permanents
-        obj_perm.appliquer(self)
-        return not present
+        Ajoute un objet permanent S'IL N'EXISTE PAS DÉJÀ.
+        """
+        if obj_perm.nom in self.noms_objets_permanents :
+            return
+        self.noms_objets_permanents.add(obj_perm.nom)
+        self.objets_permanents.append(obj_perm)
+        # si l'objet a une méthode appliquer, on peut l'appeler
+        if hasattr(obj_perm, "appliquer"):
+            obj_perm.appliquer(self)
 
     
     def possede_obj_permanent (self, nom : str) -> bool :
@@ -159,14 +163,14 @@ class Inventaire :
 
     def ouvrir_porte (self, niveau : int, dry_run : bool = False) -> bool :   # dry_run pour l'UI
         """ dry_run permet de pre-verifier action sans la comettre """
-        if niveau <= 0:
+        if niveau == 0:
             return True
         if niveau == 1:
             if self.cles > 0:
                 if not dry_run:
                     self.cles -= 1
                 return True
-            if self.possede_obj_permanent("kit_de_crochetage"):
+            if self.possede_obj_permanent("kit_crochetage"):
                 return True  
             return False
         if niveau == 2:
@@ -190,11 +194,28 @@ class Inventaire :
    
     
 
-    ####### GESTION OUVERTURE COFFRE
-    def peut_ouvrir_coffre (self) -> bool :
-        return self.ouvrir_coffre(dry_run=True)
+    ####### GESTION OUVERTURE CASIER
+    def peut_ouvrir_casier (self) -> bool :
+        return self.cles > 0
 
-    def ouvrir_coffre(self, dry_run : bool = False) -> bool :
-        if self.possede_obj_permanent("marteau") :  # ouverture avec le marteau
+    def ouvrir_casier(self, dry_run : bool = False) -> bool :
+        if self.cles <= 0:
+            return False
+        if not dry_run:
+            self.cles -= 1
+        return True
+
+    ####### GESTION OUVERTURE COFFRE
+    def ouvrir_coffre(self, dry_run: bool = False) -> bool :
+        """
+        Coffre : clé OU marteau.
+        - si marteau dans les perma -> gratuit
+        - sinon -> 1 clé
+        """
+        if "marteau" in self.noms_objets_permanents:
             return True
-        return (self.cles > 0) if dry_run else self.depenser_cles(1)
+        if self.cles > 0:
+            if not dry_run:
+                self.cles -= 1
+            return True
+        return False

@@ -1,9 +1,13 @@
 from src.Grille import Grille
 from src.Joueur import Joueur
-from src.Piece2 import Piece2, CouleurPiece
+from src.Piece2 import Piece2, CouleurPiece, FORME_CROIX
 from src.Pioche2 import Pioche2
 from src.AutreObjet import Coffre, Casier, EndroitCreuser
 from typing import Dict, Optional, Any
+import random
+from src.AutreObjet import AutreObjet, Banane, Gateau, Pomme, Repas, Sandwich
+from src.ObjetPermanent import DetecteurMetaux, KitCrochetage, Marteau, ObjetPermanent, PatteLapin, Pelle
+
 
 class Game:
     """
@@ -18,11 +22,20 @@ class Game:
         self.pioche_pieces = Pioche2()
         self.state : str = "exploration"  # autres états : "tirage", "victoire", "game_over", "achat"
         self.tour = 0  # compteur de tours
+        
+        self.boosts_pioche_par_couleur : Dict[CouleurPiece, int] = {c : 0 for c in CouleurPiece}
+        self.boosts_loot : Dict[str, int] = {
+            "gemmes": 0,
+            "piecesOr": 0,
+            "cles": 0,
+            "obj_perm": 0,
+        }
 
-        self.tirage_en_cours : Optional[Dict[str, Any]] = None  # dictionnaire à clés texte, valeurs de types mélangés”
-        # self.boost_couleur
+        self.ressources_grille : Dict[tuple[int,int], Dict[str,int]] = {}  # exemple " {(3,4): {"or": 1}, (1,1): {"gemmes": 2}}"
 
+        self.tirage_en_cours : Optional[Dict[str, Any]] = None  # dictionnaire à clés texte, valeurs de types mélangés” 
         self.contexte_achat : Optional[Dict[str, Any]] = None
+        self.contexte_special: dict | None = None
 
         # il faut qu il y ait une piece au depart a la position du joueur 
         x0, y0 = self.joueur.position
@@ -33,9 +46,16 @@ class Game:
             self.joueur.position = (x0, y0)
 
         if self.grille.get_piece(x0,y0) is None :
-            from src.Piece2 import Piece2, FORME_CROIX 
             piece_a_placer = Piece2("départ", CouleurPiece.BLEU, FORME_CROIX)
             self.grille.placer_piece(x0, y0, piece_a_placer)
+
+
+        nx, ny = self.grille.voisin(x0, y0, "N")
+        if self.grille.deplacement_permis(nx, ny):
+            porte_n = self.grille.garantie_porte(x0, y0, "N", niveau=0)
+            porte_n.ouverte = True
+            # miroir
+            self.grille.dict_portes(nx, ny)["S"].ouverte = True
 
 
 
@@ -65,7 +85,7 @@ class Game:
             new_y = y + dy
             dir_entree = self._direction_vect(dx, dy)
 
-            pieces = self.pioche_pieces.tirage_3_pieces(self.grille, new_x, new_y, dir_entree)
+            pieces = self.pioche_pieces.tirage_3_pieces(self.grille, new_x, new_y, dir_entree, boosts=self.boosts_pioche_par_couleur)
 
             if not pieces :
                 return 
@@ -111,11 +131,58 @@ class Game:
 
         piece.poser_piece(self.grille, cible_x, cible_y)
         piece.effet_tirage(self)
+        piece.effet_modif_pioche(self)
+        piece.effet_modif_objets(self)
+        piece.effet_ajout_catalogue(self)
+        # (la dispersion peut être déclenchée ici aussi si c'est une pièce de ce type)
+        if "dispersion" in piece.tags:
+            piece.effet_dispersion(self)
+
+        self.tirage_en_cours = None
+        self.state = "exploration"
 
         self.tirage_en_cours = None # fin phase tirage
         self.state = "exploration"
 
 
+    def handle_ouvrir_sur_piece_courante(self):
+        """
+        Appelé par l'UI quand le joueur appuie sur 'O' en exploration.
+        On regarde si la pièce courante avait laissé un contexte spécial.
+        """
+        if self.state != "exploration":
+            return
+
+        if not self.contexte_special:
+            return
+
+        kind = self.contexte_special.get("type")
+
+        # casier -> 2.2 : "ouverts uniquement avec des clés"
+        if kind == "casier":
+            if self.inv.ouvrir_casier():
+                # on donne un consommable aléatoire
+                obj = random.choice([Pomme(), Banane(), Gateau(), Sandwich(), Repas()])
+                obj.appliquer(self.inv)
+                # on peut vider le contexte après ouverture
+                self.contexte_special = None
+            else:
+                # pas de clé → on peut garder le contexte pour réessayer plus tard
+                pass
+
+        # coffre
+        elif kind == "coffre":
+            if self.inv.ouvrir_coffre():
+                obj = random.choice([Pomme(), Banane(), Gateau(), Sandwich(), Repas()])
+                obj.appliquer(self.inv)
+                self.contexte_special = None
+
+        # endroit à creuser
+        elif kind == "creuser":
+            if self.inv.creuser():
+                obj = random.choice([Pomme(), Banane(), Gateau()])
+                obj.appliquer(self.inv)
+                self.contexte_special = None
 
     
     def handle_re_tirage (self) -> None :
@@ -137,6 +204,71 @@ class Game:
 
         self.tirage_en_cours["pieces"] = pieces
         self.tirage_en_cours["index"] = 0
+
+
+    def handle_shop_confirm(self) -> None:
+        """
+        Valide un achat dans une pièce de type magasin.
+        On lit self.contexte_achat construit dans Piece2.effet_a_l_entree.
+        Format attendu :
+            {
+                "piece": <Piece2>,
+                "offres": [
+                    ("Clé", 3, "cle"),
+                    ("Dé", 4, "de"),
+                    ("Pelle", 6, "pelle"),
+                    ...
+                ],
+                # optionnel :
+                "index": 0
+            }
+        Pour l'instant on achète l'offre 0 ou l'index donné.
+        """
+        if self.state != "shop" or not self.contexte_achat:
+            return
+
+        offres = self.contexte_achat.get("offres", [])
+        if not offres:
+            # rien à acheter → on sort du shop
+            self.state = "exploration"
+            self.contexte_achat = None
+            return
+
+        # si plus tard tu ajoutes la navigation ↑/↓ dans le shop
+        index = self.contexte_achat.get("index", 0)
+        if index < 0 or index >= len(ofres := offres):
+            index = 0
+
+        label, cout, code = ofres[index]
+
+        # vérifier les gemmes
+        if not self.inv.depenser_gemmes(cout):
+            # pas assez → on reste dans le shop
+            return
+
+        # appliquer l'achat
+        if code == "cle":
+            self.inv.ramasser_cles(1)
+
+        elif code == "de":
+            self.inv.ramasser_des(1)
+
+        elif code == "pelle":
+            # objet permanent
+            from src.ObjetPermanent import Pelle  # adapte au nom exact dans ton fichier
+            self.inv.ajouter_obj_permanent(Pelle())
+
+        elif code == "marteau":
+            from src.ObjetPermanent import Marteau
+            self.inv.ajouter_obj_permanent(Marteau())
+
+        elif code == "kit":
+            from src.ObjetPermanent import KitCrochetage
+            self.inv.ajouter_obj_permanent(KitCrochetage())
+
+        # après l'achat on quitte le shop
+        self.state = "exploration"
+        self.contexte_achat = None
 
 
 
@@ -200,4 +332,5 @@ class Game:
             self.state = "victoire"
             return 
         
+
 
