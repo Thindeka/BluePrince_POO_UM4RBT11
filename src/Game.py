@@ -206,71 +206,52 @@ class Game:
         self.tirage_en_cours["index"] = 0
 
 
-    def handle_shop_confirm(self) -> None:
-        """
-        Valide un achat dans une pièce de type magasin.
-        On lit self.contexte_achat construit dans Piece2.effet_a_l_entree.
-        Format attendu :
-            {
-                "piece": <Piece2>,
-                "offres": [
-                    ("Clé", 3, "cle"),
-                    ("Dé", 4, "de"),
-                    ("Pelle", 6, "pelle"),
-                    ...
-                ],
-                # optionnel :
-                "index": 0
-            }
-        Pour l'instant on achète l'offre 0 ou l'index donné.
-        """
+    def handle_confirmation_magasin(self) -> None:
+
         if self.state != "shop" or not self.contexte_achat:
             return
 
-        offres = self.contexte_achat.get("offres", [])
-        if not offres:
-            # rien à acheter → on sort du shop
-            self.state = "exploration"
-            self.contexte_achat = None
+        inv = self.inv
+        offres = self.contexte_achat["offres"]
+        i = self.contexte_achat["index"]
+        offre = offres[i]
+
+        prix = offre["prix"]
+        action = offre["action"]
+
+        # pas assez d'or → on ne fait rien
+        if inv.piecesOr < prix:
+            # tu peux mettre un petit message plus tard
             return
 
-        # si plus tard tu ajoutes la navigation ↑/↓ dans le shop
-        index = self.contexte_achat.get("index", 0)
-        if index < 0 or index >= len(ofres := offres):
-            index = 0
+        # on paie
+        inv.depenser_pieceOr(prix)
 
-        label, cout, code = ofres[index]
+        # on applique
+        if action == "cle":
+            inv.ramasser_cles(1)
+        elif action == "de":
+            inv.ramasser_des(1)
+        elif action == "pomme":
+            inv.ramasser_pas(2)
+        elif action == "pelle":
+            # on ajoute l'objet permanent à l'inventaire
+            from src.ObjetPermanent import Pelle
+            inv.ajouter_obj_permanent(Pelle())
 
-        # vérifier les gemmes
-        if not self.inv.depenser_gemmes(cout):
-            # pas assez → on reste dans le shop
+        # on reste dans le shop (on pourrait sortir après 1 achat, à toi de choisir)
+        # si tu veux sortir direct : 
+        # self.state = "exploration"
+        # self.contexte_achat = None
+
+    def handle_annuler_achat(self) -> None:
+        """
+        Sortir du shop sans rien faire.
+        """
+        if self.state != "achat":
             return
-
-        # appliquer l'achat
-        if code == "cle":
-            self.inv.ramasser_cles(1)
-
-        elif code == "de":
-            self.inv.ramasser_des(1)
-
-        elif code == "pelle":
-            # objet permanent
-            from src.ObjetPermanent import Pelle  # adapte au nom exact dans ton fichier
-            self.inv.ajouter_obj_permanent(Pelle())
-
-        elif code == "marteau":
-            from src.ObjetPermanent import Marteau
-            self.inv.ajouter_obj_permanent(Marteau())
-
-        elif code == "kit":
-            from src.ObjetPermanent import KitCrochetage
-            self.inv.ajouter_obj_permanent(KitCrochetage())
-
-        # après l'achat on quitte le shop
-        self.state = "exploration"
         self.contexte_achat = None
-
-
+        self.state = "exploration"
 
     def utiliser_objet(self, objet_nom: str):  # interaction avec les objets 
         """
@@ -310,9 +291,38 @@ class Game:
             f"Dés : {self.inv.des}"
         )
     
+    def entree_magasin(self, piece) -> None:
+        """
+        Appelé quand on entre dans une pièce jaune.
+        On prépare les offres et on passe en état 'shop'.
+        """
+        # offres simples pour l'instant
+        offres = [
+            {"label": "Clé", "prix": 3, "action": "cle"},
+            {"label": "Dé", "prix": 4, "action": "de"},
+            {"label": "Pomme", "prix": 1, "action": "pomme"},
+            {"label": "Pelle (permanent)", "prix": 6, "action": "pelle"},
+        ]
+
+        self.contexte_achat = {
+            "piece": piece,
+            "offres": offres,
+            "index": 0,   # offre sélectionnée
+        }
+        self.state = "shop"
 
 
-
+    def handle_deplacement_magasin (self, delta: int) -> None:
+        """
+        Pour naviguer dans les offres du shop (si tu veux ← / → plus tard).
+        """
+        if self.state != "shop" or not self.contexte_achat:
+            return
+        offres = self.contexte_achat["offres"]
+        i = self.contexte_achat["index"]
+        i = (i + delta) % len(offres)
+        self.contexte_achat["index"] = i
+    
     ##### FONCTIONS AUXILIAIRES
 
     def _direction_vect (self, dx : int, dy : int) :

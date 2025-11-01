@@ -204,6 +204,11 @@ class Piece2 :
             if "cles" in drop:
                 inv.ramasser_cles(drop["cles"])
 
+        if self.couleur is CouleurPiece.JAUNE or "shop" in nom or "magasin" in nom or "store" in nom:
+            game.entree_magasin(self)
+            return
+
+
         if self.recompense_prise : 
             return
 

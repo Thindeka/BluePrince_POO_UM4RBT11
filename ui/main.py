@@ -77,16 +77,15 @@ def main() :
             
             # AJOUTER ACTION ACHAT
 
-        elif game.state == "shop":
+        elif game.state == "achat":
             # ENTER : acheter l'offre sélectionnée
             if "confirmer" in actions :
-                game.handle_shop_confirm()
+                game.handle_confirmation_magasin()
 
             # ESC : quitter le shop
             if "annuler" in actions :
                 # on revient à l'exploration
-                game.state = "exploration"
-                game.contexte_achat = None
+                game.handle_annuler_achat()
 
         # affichage
         renderer.render(ecran, game)

@@ -16,6 +16,10 @@ from src.Piece2 import (
     FORME_COULOIR_NS,
     FORME_ANGLE_NE,
     FORME_CROIX,
+    FORME_IMPASSE_N,
+    FORME_IMPASSE_S,
+    FORME_IMPASSE_E,
+    FORME_IMPASSE_O,
     CouleurPiece,
     FORME_CARRE
 )
@@ -74,9 +78,22 @@ class Pioche2 :
 
         # ——— croix ———
         pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_CROIX, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Kitchen", CouleurPiece.BLEU, FORME_CARRE))
+
+        # 2) Locksmith : magasin → on le décline dans les 4 sens
+        pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_N))
+        pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_S))
+        pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_E))
+        pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_O))
+
+        # 3) Comissary : pareil
+        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_N))
+        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_S))
+        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_E))
+        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_O))
 
         return pieces
-        
+            
 
 
 

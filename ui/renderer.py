@@ -23,7 +23,6 @@ class Renderer:
 
         # cache d'images pour ne pas recharger à chaque frame
         self.images_cache: dict[tuple[str, int], pygame.Surface] = {}
-        # dossier où tu as mis tes images
         self.dir_images = os.path.join("assets", "images_pieces")
 
     # ----------------------------------------------------------
@@ -43,7 +42,7 @@ class Renderer:
         if game.state == "tirage":
             self.render_ecran_tirage(ecran, game)
         elif game.state == "shop":
-            self.render_shop(ecran, game)
+            self.render_magasin(ecran, game)
         elif game.state == "game_over":
             self.render_game_over(ecran)
         elif game.state == "victoire":
@@ -61,7 +60,7 @@ class Renderer:
         pygame.draw.rect(ecran, (25, 25, 35), (0, 0, ecran.get_width(), 110))
 
         # titre
-        titre = self.font_title.render("Blue Prince (version POO)", True, (240, 240, 240))
+        titre = self.font_title.render("Blue Prince", True, (240, 240, 240))
         ecran.blit(titre, (15, 8))
 
         # inventaire de base
@@ -263,29 +262,74 @@ class Renderer:
     # ----------------------------------------------------------
     # écran de shop
     # ----------------------------------------------------------
-    def render_shop(self, ecran: pygame.Surface, game: "Game") -> None:
+    def render_magasin(self, ecran: pygame.Surface, game: "Game") -> None:
+        """
+        exemple game.context  :
+        On suppose que game.contexte_achat ressemble à :
+        {
+            "piece": <Piece2>,
+            "offres": [
+                {"label": "Clé", "prix": 3, "action": "cle"},
+                ...
+            ],
+            "index": 0
+        }
+        """
         data = game.contexte_achat
         if not data:
-            return
+            return  # rien à afficher
+
         offres = data.get("offres", [])
+        idx_sel = data.get("index", 0)
+        piece = data.get("piece", None)
 
-        surf = pygame.Surface(ecran.get_size(), pygame.SRCALPHA)
-        surf.fill((0, 0, 0, 160))
-        ecran.blit(surf, (0, 0))
+        W, H = ecran.get_size()
+        box_w, box_h = 480, 300
+        box_x = W // 2 - box_w // 2
+        box_y = H // 2 - box_h // 2
 
-        w, h = ecran.get_size()
-        box = pygame.Rect(w // 2 - 200, h // 2 - 150, 400, 300)
-        pygame.draw.rect(ecran, (40, 40, 60), box, border_radius=10)
-        pygame.draw.rect(ecran, (240, 240, 240), box, 2, border_radius=10)
+        # fond
+        pygame.draw.rect(ecran, (15, 15, 15), (box_x, box_y, box_w, box_h))
+        pygame.draw.rect(ecran, (240, 240, 240), (box_x, box_y, box_w, box_h), 2)
 
-        ecran.blit(self.font.render("Magasin", True, (255, 255, 255)), (box.x + 20, box.y + 15))
-        ecran.blit(self.small.render("(O) pour acheter, ESC pour sortir", True, (220, 220, 220)), (box.x + 20, box.y + 45))
+        # titre
+        titre = "Magasin"
+        if piece is not None:
+            titre = f"Magasin : {piece.nom}"
+        ecran.blit(self.font_title.render(titre, True, (255, 255, 255)),
+                (box_x + 16, box_y + 12))
 
-        y = box.y + 80
-        for label, prix, code in offres:
-            ligne = f"{label} - {prix} or"
-            ecran.blit(self.font.render(ligne, True, (230, 230, 230)), (box.x + 20, y))
-            y += 35
+        # argent du joueur
+        inv = game.inv
+        infos = f"Or: {inv.piecesOr}   Gemmes: {inv.gemmes}   Clés: {inv.cles}"
+        ecran.blit(self.small.render(infos, True, (210, 210, 210)),
+                (box_x + 16, box_y + 48))
+
+        # liste des offres
+        y = box_y + 90
+        for i, off in enumerate(ofres := offres):
+            label = off["label"]
+            prix = off["prix"]
+            line = f"{label}  —  {prix} or"
+
+            # cadre de sélection
+            if i == idx_sel:
+                # fond léger derrière l'item sélectionné
+                pygame.draw.rect(ecran, (70, 70, 20), (box_x + 10, y - 4, box_w - 20, 32), border_radius=6)
+                col = (255, 255, 180)
+            else:
+                col = (230, 230, 230)
+
+            ecran.blit(self.font.render(line, True, col), (box_x + 20, y))
+            y += 38
+
+        # aides clavier
+        aide1 = "Entrée / O : acheter    Échap : quitter"
+        aide2 = "← / → ou ZQSD : changer d'article"
+        ecran.blit(self.small.render(aide1, True, (210, 210, 210)),
+                (box_x + 16, box_y + box_h - 55))
+        ecran.blit(self.small.render(aide2, True, (160, 160, 160)),
+                (box_x + 16, box_y + box_h - 30))
 
     # ----------------------------------------------------------
     # écrans de fin
