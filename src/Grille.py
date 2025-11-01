@@ -14,8 +14,6 @@ if TYPE_CHECKING:
 
 
 
-
-
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
 DIRECTIONS_REVERSE = {(0,-1):"N",(0,1):"S",(1,0):"E",(-1,0):"O"}
 OPPOSE = {"N" : "S", "S" : "N", "E" : "O", "O" : "E"}
@@ -32,7 +30,6 @@ class Grille :
         self.__hauteur = hauteur
         self.__pieces = [[None for _ in range(self.__largeur)] for __ in range(self.__hauteur)]
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
-        #self.sortie = (self.__largeur - 1, self.__hauteur - 1)
         self.sortie = (2, 0)  # (x, y) => x=2, y=0
 
 

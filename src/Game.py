@@ -7,7 +7,7 @@ from typing import Dict, Optional, Any
 import random
 from src.AutreObjet import AutreObjet, Banane, Gateau, Pomme, Repas, Sandwich
 from src.ObjetPermanent import DetecteurMetaux, KitCrochetage, Marteau, ObjetPermanent, PatteLapin, Pelle
-
+from src.Piece2 import FORME_T_ONE, OPPOSE
 
 class Game:
     """
@@ -46,7 +46,7 @@ class Game:
             self.joueur.position = (x0, y0)
 
         if self.grille.get_piece(x0,y0) is None :
-            piece_a_placer = Piece2("départ", CouleurPiece.BLEU, FORME_CROIX)
+            piece_a_placer = Piece2("Entrance", CouleurPiece.BLEU, FORME_T_ONE)
             self.grille.placer_piece(x0, y0, piece_a_placer)
 
 
@@ -83,7 +83,7 @@ class Game:
             x, y = self.joueur.position
             new_x = x + dx
             new_y = y + dy
-            dir_entree = self._direction_vect(dx, dy)
+            dir_entree = OPPOSE[self._direction_vect(dx, dy)]
 
             pieces = self.pioche_pieces.tirage_3_pieces(self.grille, new_x, new_y, dir_entree, boosts=self.boosts_pioche_par_couleur)
 
@@ -167,7 +167,7 @@ class Game:
                 # on peut vider le contexte après ouverture
                 self.contexte_special = None
             else:
-                # pas de clé → on peut garder le contexte pour réessayer plus tard
+                # pas de clé => on peut garder le contexte pour réessayer plus tard
                 pass
 
         # coffre
@@ -208,61 +208,37 @@ class Game:
 
     def handle_confirmation_magasin(self) -> None:
 
-        if self.state != "shop" or not self.contexte_achat:
+        if self.state != "achat" or not self.contexte_achat:
             return
 
-        inv = self.inv
         offres = self.contexte_achat["offres"]
-        i = self.contexte_achat["index"]
-        offre = offres[i]
+        i = self.contexte_achat.get("index", 0)
+        nom, prix, code = offres[i]
 
-        prix = offre["prix"]
-        action = offre["action"]
-
-        # pas assez d'or → on ne fait rien
-        if inv.piecesOr < prix:
-            # tu peux mettre un petit message plus tard
+        if not self.inv.depenser_pieceOr(prix):  # on essaye de voir si on assez d or
             return
 
-        # on paie
-        inv.depenser_pieceOr(prix)
+        # appliquer l'achat
+        if code == "cle":
+            self.inv.ramasser_cles(1)
+        elif code == "de":
+            self.inv.ramasser_des(1)
+        elif code == "pomme":
+            Pomme().appliquer(self.inv)
+        elif code == "pelle":
+            self.inv.ajouter_obj_permanent(Pelle())
 
-        # on applique
-        if action == "cle":
-            inv.ramasser_cles(1)
-        elif action == "de":
-            inv.ramasser_des(1)
-        elif action == "pomme":
-            inv.ramasser_pas(2)
-        elif action == "pelle":
-            # on ajoute l'objet permanent à l'inventaire
-            from src.ObjetPermanent import Pelle
-            inv.ajouter_obj_permanent(Pelle())
+        self.handle_quitter_magasin()
 
-        # on reste dans le shop (on pourrait sortir après 1 achat, à toi de choisir)
-        # si tu veux sortir direct : 
-        # self.state = "exploration"
-        # self.contexte_achat = None
-
-    def handle_annuler_achat(self) -> None:
-        """
-        Sortir du shop sans rien faire.
-        """
-        if self.state != "achat":
-            return
-        self.contexte_achat = None
-        self.state = "exploration"
 
     def utiliser_objet(self, objet_nom: str):  # interaction avec les objets 
-        """
-        Utilise un objet consommable depuis l’inventaire.
-        """
+   
         for obj in self.inv.autres_objets:
             if obj.nom == objet_nom:
                 obj.appliquer(self.inv)
                 self.inv.autres_objets.remove(obj)
                 return f"Vous avez utilisé une {obj.nom}."
-        return "Objet non trouvé dans l’inventaire."
+        return "Objet non trouvé dans l'inventaire."
 
 
     def ouvrir_coffre(self, coffre: Coffre):
@@ -285,7 +261,7 @@ class Game:
             f"État : {self.state}\n"
             f"Position : {self.joueur.position}\n"
             f"Pas restants : {self.inv.pas}\n"
-            f"Pièces d’or : {self.inv.piecesOr}\n"
+            f"Pièces d'or : {self.inv.piecesOr}\n"
             f"Gemmes : {self.inv.gemmes}\n"
             f"Clés : {self.inv.cles}\n"
             f"Dés : {self.inv.des}"
@@ -294,14 +270,14 @@ class Game:
     def entree_magasin(self, piece) -> None:
         """
         Appelé quand on entre dans une pièce jaune.
-        On prépare les offres et on passe en état 'shop'.
+        On prépare les offres et on passe en état 'achat'.
         """
-        # offres simples pour l'instant
+        # offres à diversifier
         offres = [
-            {"label": "Clé", "prix": 3, "action": "cle"},
-            {"label": "Dé", "prix": 4, "action": "de"},
-            {"label": "Pomme", "prix": 1, "action": "pomme"},
-            {"label": "Pelle (permanent)", "prix": 6, "action": "pelle"},
+            ("Clé", 3, "cle"),
+            ("Dé", 4, "de"),
+            ("Pomme", 1, "pomme"),
+            ("Pelle (permanent)", 6, "pelle"),
         ]
 
         self.contexte_achat = {
@@ -309,21 +285,24 @@ class Game:
             "offres": offres,
             "index": 0,   # offre sélectionnée
         }
-        self.state = "shop"
+        self.state = "achat"
 
-
-    def handle_deplacement_magasin (self, delta: int) -> None:
+    
+    def handle_navigation_magasin (self, delta: int) -> None:
         """
-        Pour naviguer dans les offres du shop (si tu veux ← / → plus tard).
+        delta = -1 (gauche) ou 1 (droite)
         """
-        if self.state != "shop" or not self.contexte_achat:
+        if self.state != "achat" or not self.contexte_achat:
             return
         offres = self.contexte_achat["offres"]
-        i = self.contexte_achat["index"]
+        i = self.contexte_achat.get("index", 0)
         i = (i + delta) % len(offres)
         self.contexte_achat["index"] = i
-    
-    ##### FONCTIONS AUXILIAIRES
+
+    def handle_quitter_magasin (self) -> None :
+        self.contexte_achat = None
+        self.state = "exploration"
+
 
     def _direction_vect (self, dx : int, dy : int) :
         correspondances = {

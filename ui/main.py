@@ -79,18 +79,23 @@ def main() :
 
         elif game.state == "achat":
             # ENTER : acheter l'offre sélectionnée
-            if "confirmer" in actions :
-                game.handle_confirmation_magasin()
+            if "confirmer" in actions or 'ouvrir' in actions :
+                game.handle_quitter_magasin()
 
-            # ESC : quitter le shop
+            # ESC : quitter le magasin
             if "annuler" in actions :
                 # on revient à l'exploration
-                game.handle_annuler_achat()
+                game.handle_confirmation_magasin()
+
+            elif "deplacer" in actions :
+                dx, dy = actions["deplacer"]
+                if dx != 0:  # on ignore haut/bas
+                    game.handle_navigation_magasin(dx)
+      
 
         # affichage
         renderer.render(ecran, game)
         pygame.display.flip()  # on eneregistre les changememts
-
         clock.tick(FPS)   
     
     pygame.quit()

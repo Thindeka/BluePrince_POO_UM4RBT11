@@ -29,25 +29,6 @@ class CouleurPiece(Enum) :
     ROUGE = auto()
     BLEU = auto()
 
-class JaunePiece(Enum) :
-    COMMISSARIAT = auto()
-    CUISINE = auto()
-    SERRURERIE = auto()
-    SALLE_EXPO = auto()
-    BUANDERIE = auto()
-    LIBRAIRIE = auto()
-    ARMURERIE = auto()
-    BOUTIQUE_CADEAUX = auto()
-
-class VertPiece(Enum) :
-    TERASSE = auto()
-    PATIO = auto()
-    COUR_INTERIEURE = auto()
-    CLOITRE = auto()
-    VERANDA = auto()
-    SERRE = auto()
-    SALON_MATINAL = auto()
-    JARDIN_SECRET = auto()
 
 class FormePiece :
     """ correspond a l meplacement des portes de la piece """
@@ -62,7 +43,7 @@ class FormePiece :
         return direction in self.ens_portes
     
 
-# FORMES DE PIECE (pas exhaustif)
+# FORMES DE PIECE
 
 # COULOIR
 FORME_COULOIR_NS = FormePiece("couloir_ns", {"N", "S"})
@@ -86,10 +67,10 @@ FORME_ANGLE_ES = FormePiece("angle_es", {"E", "S"})
 FORME_ANGLE_SO = FormePiece("angle_so", {"S", "O"})
 FORME_ANGLE_ON = FormePiece("angle_on", {"O", "N"})
 
-# T
+# TROIS VOIES 
 FORME_T_NES = FormePiece("t_nes", {"N", "E", "S"})
 FORME_T_ESO = FormePiece("t_eso", {"E", "S", "O"})
-FORME_T_SON = FormePiece("t_son", {"S", "O  ", "N"})
+FORME_T_SON = FormePiece("t_son", {"S", "O", "N"})
 FORME_T_ONE = FormePiece("t_one", {"O", "N", "E"})
 
 
@@ -166,7 +147,7 @@ class Piece2 :
         
         for d in self.forme.ens_portes :
             porte = grille.garantie_porte(x, y, d)
-            porte.ouverte = True  ################
+            porte.ouverte = True
             new_x, new_y = grille.voisin(x, y, d)
 
             if not grille.deplacement_permis(new_x, new_y) :
@@ -194,7 +175,7 @@ class Piece2 :
         x, y = game.joueur.position
         nom = self.nom.lower()
 
-        # 0) récupérer les ressources déposées par d'autres pièces
+        # récupérer les ressources déposées par d'autres pièces
         drop = game.ressources_grille.pop((x, y), None)
         if drop:
             if "gemmes" in drop:
@@ -212,7 +193,6 @@ class Piece2 :
         if self.recompense_prise : 
             return
 
-        # --- pièces violettes du style "bedroom", "maid's chamber", ...
         if "bedroom" in nom or "chambre" in nom:
             # regagner des pas
             inv.ramasser_pas(3)
@@ -225,7 +205,6 @@ class Piece2 :
             self.recompense_prise = True
             return
 
-        # --- jardins / veranda / patio : souvent gemmes + objets possibles
         if "garden" in nom or "veranda" in nom or "patio" in nom or "greenhouse" in nom :
             # gemme quasi systématique
             inv.ramasser_gemmes(1)
@@ -255,10 +234,9 @@ class Piece2 :
             
             self.recompense_prise = True
             return
-
-        # --- locker room : casiers (2.2)
+        
         if "locker" in nom or "vestiaire" in nom:
-            # on ne l'ouvre pas automatiquement → c'est au joueur d'appuyer sur O
+            # on ne l'ouvre pas automatiquement  c'est au joueur d'appuyer sur O
             # donc on indique juste au game qu'on est sur un casier
             game.contexte_special = {"type": "casier", "piece": self}
             if hasattr(self, "contenu"):
@@ -267,7 +245,6 @@ class Piece2 :
             self.recompense_prise = True
             return
 
-        # --- pièces jaunes → magasin
         if "shop" in nom or "store" in nom or "magasin" in nom:
             game.state = "shop"
             game.contexte_achat = {
@@ -280,14 +257,13 @@ class Piece2 :
             }
             self.recompense_prise = True
             return
-
-        # --- pièces rouges : pas sympas
+        
         if "furnace" in nom or "fournaise" in nom or "trap" in nom:
             inv.utiliser_pas(1)
             self.recompense_prise = True
             return
         
-        # MAID'S CHAMBER → boost + gemme (une fois)
+        # MAID'S CHAMBER  boost + gemme (une fois)
         if "maid" in nom:
             inv.chance_objets = max(inv.chance_objets, 0.7)
             inv.ramasser_gemmes(1)
@@ -295,16 +271,16 @@ class Piece2 :
             return
     
 
-        # MASTER BEDROOM → un peu plus fort
+        # MASTER BEDROOM 
         if "master bedroom" in nom:
             inv.ramasser_pas(5)
             self.recompense_prise = True
             return
         
-        # PATIO → gemme + dépôt autour (mais une seule fois)
+        # PATIO , gemme + dépôt autour (mais une seule fois)
         if "patio" in nom:
             inv.ramasser_gemmes(1)
-            # on dépose autour → ça, c’est one-shot aussi
+           
             for d, (dx, dy) in {"N": (0,-1), "S": (0,1), "E": (1,0), "O": (-1,0)}.items():
                 nx, ny = x + dx, y + dy
                 if game.grille.deplacement_permis(nx, ny):
@@ -314,7 +290,7 @@ class Piece2 :
             self.recompense_prise = True
             return
         
-        # OFFICE → or déposé une fois
+        # OFFICE
         if "office" in nom:
             for d, (dx, dy) in {"N": (0,-1), "S": (0,1), "E": (1,0), "O": (-1,0)}.items():
                 nx, ny = x + dx, y + dy
@@ -325,7 +301,7 @@ class Piece2 :
             self.recompense_prise = True
             return
         
-        # CHAMBER OF MIRRORS → ajoute des pièces (une fois)
+        # CHAMBER OF MIRRORS: ajoute des pièces (une fois)
         if "chamber of mirrors" in nom:
             if hasattr(game, "pioche_pieces") and game.pioche_pieces:
                 game.pioche_pieces.ajouter_piece_modele("couloir_NS")
@@ -333,7 +309,7 @@ class Piece2 :
             self.recompense_prise = True
             return
 
-        # POOL → soin une fois
+        # POOL : soin une fois
         if "pool" in nom:
             inv.ramasser_pas(4)
             self.recompense_prise = True
@@ -341,216 +317,7 @@ class Piece2 :
 
 
         return
-        """
         
-        # JAUNE = MAGASIN = ECHANGER OR PAR OBJETS
-        if self.couleur is CouleurPiece.JAUNE :
-            game.state = "achat"
-            if self.jaune is JaunePiece.COMMISSARIAT :
-                self.forme is FORME_ANGLE_SO
-                self.rarete is 1
-                self.cout_gemmes is 1
-                produits_base = [     
-                    ("gemmes", 3, "gemmes"),
-                    ("pelle", 6, "pelle"),
-                    ("marteau", 8, "marteau"),
-                    ("détecteur_metaux", 10, "detecteur_metaux"),
-                    ("gemmes", 10, "gemmes", 4), ### à vérifier
-                    ("clé", 10, "cles")
-                ]
-                produits_tirage = [random.choice(produits_base) for i in range(4)]
-                game.contexte_achat = {
-                "piece" : self,
-                "produits" : produits_tirage
-                }
-                return
-            if self.jaune is JaunePiece.CUISINE :
-                self.forme is FORME_ANGLE_SO
-                self.rarete is 0
-                self.cout_gemmes is 1
-                contenu_possible = [
-                    None, 
-                    ("cles", 1), 
-                    ("gemmes", 1), 
-                    ("pieceOr", 2), 
-                    ("pieceOr", 3), 
-                    ("pieceOr", 5)
-                ]
-                contenu_tirage = random.choice(contenu_possible)
-                if contenu_tirage is not None :
-                    objet, quantite = contenu_tirage
-                    if objet == "cles" :
-                        inv.ramasser_cles(quantite)
-                    elif objet == "gemmes" :
-                        inv.ramasser_gemmes(quantite)
-                    elif objet == "pieceOr" :
-                        inv.ramasser_pieceOr(quantite)
-
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                        ("banane", 2, "banane"),
-                        ("sandwich", 8, "sandwich"),
-                    ]
-                    }
-                
-                return
-            if self.jaune is JaunePiece.SERRURERIE :
-                self.forme is FORME_IMPASSE_S
-                self.rarete is 2
-                self.cout_gemmes is 1
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                        ("clé", 5, "cles"),
-                        ("clé", 12, "cles", 3),
-                        ("kit_crochetage", 10, "kit_crochetage"), # info : special keys ou master keys non défini
-                    ]
-                    }
-                return 
-            if self.jaune is JaunePiece.SALLE_EXPO :
-                self.forme is FORME_COULOIR_NS
-                self.rarete is 3
-                self.cout_gemmes is 2
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                    # info : aucun objet ne ces objets n'a été défini
-                    ]
-                    }
-                return
-            if self.jaune is JaunePiece.BUANDERIE : # propose des services : particulier à coder
-                self.forme is FORME_IMPASSE_S
-                self.rarete is 3
-                self.cout_gemmes is 1
-                contenu_possible = [
-                    None, 
-                    ("cles", 1),
-                    ("pieceOr", 1)
-                    ("pieceOr", 2), 
-                    ("pieceOr", 3),
-                    ("pieceOr", 4)
-                    ("pieceOr", 5)
-                    ("pieceOr", 6)
-                ]
-                contenu_tirage = random.choice(contenu_possible)
-                if contenu_tirage is not None :
-                    objet, quantite = contenu_tirage
-                    if objet == "cles" :
-                        inv.ramasser_cles(quantite)
-                    elif objet == "pieceOr" :
-                        inv.ramasser_pieceOr(quantite)
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                    # info : 
-                    ]
-                    }
-                return
-            if self.jaune is JaunePiece.LIBRAIRIE :
-                self.forme is FORME_ANGLE_SO
-                self.rarete is 3
-                self.cout_gemmes is 1
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                    # livres : optionnels
-                    ]
-                    }
-                return
-            if self.jaune is JaunePiece.ARMURERIE :
-                self.forme is FORME_ANGLE_SO
-                self.rarete is 1
-                self.cout_gemmes is 0
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                    # objetsperm non définis
-                    ]
-                    }
-                return
-            if self.jaune is JaunePiece.BOUTIQUE_CADEAUX :
-                self.forme is FORME_T_ESO
-                self.rarete is 3
-                self.cout_gemmes is 0
-                game.contexte_achat = {
-                    "piece" : self,
-                    "produits" : [
-                    # objetsperm non définis
-                    ]
-                    }
-                return
-            
-        # VERT = JARDIN = CONTIENT GEMMES/ENDROITS_CREUSER/OBJ_PERM
-        if self.couleur is CouleurPiece.VERT :
-            if self.vert is VertPiece.TERASSE :
-                self.forme is FORME_IMPASSE_S
-                self.rarete is 1
-                self.cout_gemmes is 0
-                contenu_possible = [
-                    None, 
-                    ("banane", 1),
-                    ("orange", 1)
-                    ("gemmes", 1), 
-                    ("gemmes", 2),
-                    ("pelle")
-                ]
-                contenu_tirage = random.choice(contenu_possible)
-                if contenu_tirage is not None :
-                    objet, quantite = contenu_tirage
-                    if objet == "banane" :
-                        inv.banane(quantite)
-                    elif objet == "orange" :
-                        inv.banane(quantite)
-                    elif objet == "gemmes" :
-                        inv.ramasser_gemmes(quantite)
-                    elif objet == "pelle" :
-                        from src.ObjetPermanent import Pelle
-                        inv.ajouter_obj_permanent(Pelle())
-                    #### To be continued ######
-                    
-            inv.ramasser_gemmes(1) # contient souvent gemmes
-
-            # contient parfois endroit a creuser
-            if random.random() < 0.50 :
-                if inv.peut_creuser() : ### ajouter une condition supp : joueur possède détecteur de métaux ?
-                    inv.ramasser_pieceOr(1)
-
-            if random.random() < 0.20 :
-                from src.ObjetPermanent import Pelle, Marteau, KitCrochetage, DetecteurMetaux, PatteLapin
-                objets = [Pelle(), Marteau(), KitCrochetage(), DetecteurMetaux(), PatteLapin()]
-                objets_possibles = [o for o in objets if not inv.possede_obj_permanent(o.nom)]  # on veux donner qqch de nouveau
-                if objets_possibles :
-                    o = random.choice(objets_possibles)
-                    inv.ajouter_obj_permanent(o)
-            
-            return
-
-
-        
-        # VIOLET = CHAMBRE = REGAGNER PAS
-        if self.couleur is CouleurPiece.VIOLET :
-            inv.ramasser_pas(2)   # base
-            if random.random() < 0.25 :
-                inv.ramasser_pas(1) 
-            return 
-        
-
-
-        # ORANGE = COULOIR : BCP PORTES
-        # BLEU = PIECE COMMUNE
-        if self.couleur is CouleurPiece.ORANGE or self.couleur is CouleurPiece.BLEU :
-            return
-
-        # ROUGE = MALUS
-        if self.couleur is CouleurPiece.ROUGE :
-            inv.utiliser_pas(2)
-            if random.random() < 0.20 and inv.piecesOr > 0 :
-                inv.depenser_pieceOr(1)
-            return
-    """
-        
-
     def effet_tirage (self, game : 'Game') -> None :
         """
         Appelé juste après avoir choisi cette pièce dans l'écran de tirage.
@@ -586,7 +353,7 @@ class Piece2 :
             game.pioche_pieces.ajouter_piece_modele("couloir_EO")
 
 
-##########################################################
+
     def effet_dispersion(self, game : 'Game') -> None:
         """
         Certaines pièces 'jettent' une ressource dans leurs voisines.
@@ -607,7 +374,7 @@ class Piece2 :
             game.ressources_grille.setdefault((nx, ny), {})
             game.ressources_grille[(nx, ny)]["or"] = game.ressources_grille[(nx, ny)].get("or", 0) + 1
 
-    # 4) Effet de modif de proba de tirage (Greenhouse, Furnace) 
+    # Effet de modif de proba de tirage 
     def effet_modif_pioche(self, game :'Game') -> None:
         """
         Modifie les chances de tirer certaines couleurs après que cette pièce a été posée.
@@ -619,7 +386,7 @@ class Piece2 :
         if "boost_rouge" in self.tags:
             game.boosts_pioche_par_couleur[self.couleur.__class__.ROUGE] += 1
 
-    # 5) Effet de modif de proba d'objets (Veranda, Maid’s Chamber) 
+    #  Effet de modif de proba d'objets 
     def effet_modif_objets(self, game : 'Game') -> None:
         """
         Augmente les chances de trouver certains objets plus tard.
@@ -631,7 +398,7 @@ class Piece2 :
         if "boost_cles" in self.tags:
             game.boosts_loot["cles"] += 1
 
-    # 6) Effet d'ajout au catalogue (Chamber of Mirrors, Pool) 
+    # Effet d'ajout au catalogue (Chamber of Mirrors, Pool) 
     def effet_ajout_catalogue(self, game : 'Game') -> None:
         """
         Certaines pièces ajoutent d'autres pièces à la pioche.
@@ -641,4 +408,3 @@ class Piece2 :
             game.pioche_pieces.ajouter_piece_modele("couloir_NS")
         if "ajoute_piece_rare" in self.tags:
             game.pioche_pieces.ajouter_piece_modele("salle_tresor")
-##########################################################

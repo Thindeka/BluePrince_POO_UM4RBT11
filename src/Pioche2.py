@@ -2,26 +2,25 @@ from __future__ import annotations
 import random
 from typing import List, Optional, Dict, TYPE_CHECKING
 
-"""
-from src.Piece2 import (
-    Piece2, CouleurPiece,
-    FORME_CROIX, FORME_COULOIR_NS, FORME_COULOIR_EO,
-    FORME_IMPASSE_E, FORME_IMPASSE_N, FORME_IMPASSE_S, FORME_IMPASSE_O,
-    FORME_ANGLE_NE, FORME_ANGLE_ES, FORME_ANGLE_SO, FORME_ANGLE_ON,
-)"""
-
 from src.Piece2 import (
     Piece2,
     FORME_COULOIR_EO,
     FORME_COULOIR_NS,
     FORME_ANGLE_NE,
+    FORME_ANGLE_ES,
+    FORME_ANGLE_SO,
+    FORME_ANGLE_ON,
     FORME_CROIX,
     FORME_IMPASSE_N,
     FORME_IMPASSE_S,
     FORME_IMPASSE_E,
     FORME_IMPASSE_O,
     CouleurPiece,
-    FORME_CARRE
+    FORME_CARRE,
+    FORME_T_NES,
+    FORME_T_ESO,
+    FORME_T_SON,
+    FORME_T_ONE,
 )
 
 
@@ -50,47 +49,143 @@ class Pioche2 :
     def _creer_catalogue (self) -> List[Piece2] :
         pieces: List[Piece2] = []
 
-        # ——— pièces “normales” (carrées) ———
-        pieces.append(Piece2("Bedroom", CouleurPiece.VIOLET, FORME_CARRE))
-        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_CARRE, cout_gemmes=1, rarete=1))
-        pieces.append(Piece2("Nursery", CouleurPiece.BLEU, FORME_CARRE))
-        pieces.append(Piece2("Pantry", CouleurPiece.BLEU, FORME_CARRE))
-        pieces.append(Piece2("Parlor", CouleurPiece.BLEU, FORME_CARRE))
-        pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_CARRE))
-        pieces.append(Piece2("Patio", CouleurPiece.VERT, FORME_CARRE))
-        pieces.append(Piece2("Greenhouse", CouleurPiece.VERT, FORME_CARRE, cout_gemmes=1))
-        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_CARRE))
-        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_CARRE))
-        pieces.append(Piece2("Maid's Chamber", CouleurPiece.VIOLET, FORME_CARRE))
-        pieces.append(Piece2("Chamber of Mirrors", CouleurPiece.BLEU, FORME_CARRE, cout_gemmes=2, rarete=2))
-        pieces.append(Piece2("Pool", CouleurPiece.BLEU, FORME_CARRE, cout_gemmes=1, rarete=1))
 
-        # ——— couloirs horizontaux ———
-        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_EO))
-        pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_COULOIR_EO))
+        # ----------------- PIECESS VIOLETTES -----------------
 
-        # ——— éventuellement un couloir vertical (si tu veux) ———
-        pieces.append(Piece2("Spare Foyer", CouleurPiece.ORANGE, FORME_COULOIR_NS))
+        # Bedroom
+        pieces.append(Piece2("Bedroom", CouleurPiece.VIOLET, FORME_ANGLE_SO))
+        pieces.append(Piece2("Bedroom", CouleurPiece.VIOLET, FORME_ANGLE_ES))
+        pieces.append(Piece2("Bedroom", CouleurPiece.VIOLET, FORME_ANGLE_NE))
+        pieces.append(Piece2("Bedroom", CouleurPiece.VIOLET, FORME_ANGLE_ON))
 
-        # ——— angles ———
-        pieces.append(Piece2("Entrance", CouleurPiece.BLEU, FORME_ANGLE_NE))
+
+        # Master Bedroom
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_S, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_N, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_E, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_O, cout_gemmes=1, rarete=1))
+
+
+        # Nursery
+        pieces.append(Piece2("Nursery", CouleurPiece.VIOLET, FORME_IMPASSE_S))
+        pieces.append(Piece2("Nursery", CouleurPiece.VIOLET, FORME_IMPASSE_N))
+        pieces.append(Piece2("Nursery", CouleurPiece.VIOLET, FORME_IMPASSE_E))
+        pieces.append(Piece2("Nursery", CouleurPiece.VIOLET, FORME_IMPASSE_O))
+
+
+
+        # ----------------- PIECESS BLEUES -----------------
+
+        # Pantry
+        pieces.append(Piece2("Pantry", CouleurPiece.BLEU, FORME_ANGLE_SO))
+        pieces.append(Piece2("Pantry", CouleurPiece.BLEU, FORME_ANGLE_ES))
+        pieces.append(Piece2("Pantry", CouleurPiece.BLEU, FORME_ANGLE_NE))
+        pieces.append(Piece2("Pantry", CouleurPiece.BLEU, FORME_ANGLE_ON))
+
+        #Parlor
+        pieces.append(Piece2("Parlor", CouleurPiece.BLEU, FORME_ANGLE_SO))
+        pieces.append(Piece2("Parlor", CouleurPiece.BLEU, FORME_ANGLE_ES))
+        pieces.append(Piece2("Parlor", CouleurPiece.BLEU, FORME_ANGLE_NE))
+        pieces.append(Piece2("Parlor", CouleurPiece.BLEU, FORME_ANGLE_ON))
+
+        # Office
+        pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_SO))
+        pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_ES))
+        pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_NE))
+        pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_ON))
+
+        # Chamber of Mirrors
+        pieces.append(Piece2("Chamber of Mirrors", CouleurPiece.BLEU, FORME_IMPASSE_S, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Chamber of Mirrors", CouleurPiece.BLEU, FORME_IMPASSE_N, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Chamber of Mirrors", CouleurPiece.BLEU, FORME_IMPASSE_E, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Chamber of Mirrors", CouleurPiece.BLEU, FORME_IMPASSE_O, cout_gemmes=2, rarete=2))
+
+        # Pool
+        pieces.append(Piece2("Pool", CouleurPiece.BLEU, FORME_T_NES, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Pool", CouleurPiece.BLEU, FORME_T_ESO, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Pool", CouleurPiece.BLEU, FORME_T_SON, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Pool", CouleurPiece.BLEU, FORME_T_ONE, cout_gemmes=1, rarete=1))
+        
+
+        # Gallery
+        pieces.append(Piece2("Gallery", CouleurPiece.BLEU, FORME_ANGLE_SO))
+        pieces.append(Piece2("Gallery", CouleurPiece.BLEU, FORME_ANGLE_ES))
         pieces.append(Piece2("Gallery", CouleurPiece.BLEU, FORME_ANGLE_NE))
+        pieces.append(Piece2("Gallery", CouleurPiece.BLEU, FORME_ANGLE_ON))
 
-        # ——— croix ———
-        pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_CROIX, cout_gemmes=2, rarete=2))
-        pieces.append(Piece2("Kitchen", CouleurPiece.BLEU, FORME_CARRE))
+        # Rotunda
+        pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_ANGLE_SO, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_ANGLE_ES, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_ANGLE_NE, cout_gemmes=2, rarete=2))
+        pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_ANGLE_ON, cout_gemmes=2, rarete=2))
 
-        # 2) Locksmith : magasin → on le décline dans les 4 sens
+        
+
+        # ----------------- PIECESS VERTES -----------------
+
+        # Patio
+        pieces.append(Piece2("Patio", CouleurPiece.VERT, FORME_ANGLE_SO))
+        pieces.append(Piece2("Patio", CouleurPiece.VERT, FORME_ANGLE_ES))
+        pieces.append(Piece2("Patio", CouleurPiece.VERT, FORME_ANGLE_NE))
+        pieces.append(Piece2("Patio", CouleurPiece.VERT, FORME_ANGLE_ON))
+
+        # Greenhouse
+        pieces.append(Piece2("Greenhouse", CouleurPiece.VERT, FORME_IMPASSE_S, cout_gemmes=1))
+        pieces.append(Piece2("Greenhouse", CouleurPiece.VERT, FORME_IMPASSE_N, cout_gemmes=1))
+        pieces.append(Piece2("Greenhouse", CouleurPiece.VERT, FORME_IMPASSE_E, cout_gemmes=1))
+        pieces.append(Piece2("Greenhouse", CouleurPiece.VERT, FORME_IMPASSE_O, cout_gemmes=1))
+
+        # Veranda
+        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_NS))
+        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_EO))
+
+
+       
+
+        # ----------------- PIECESS ROUGES -----------------
+
+        # Furnace 
+        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_IMPASSE_S))
+
+        # Maid's Chamber
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_SO))
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_ES))
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_NE))
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_ON))
+    
+
+
+        # ----------------- PIECESS ORANGES -----------------
+        
+        # Hallway
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_EO))
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_NS))
+
+        # Passageway
+        pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_CROIX))
+
+        
+
+
+        # ----------------- PIECESS JAUNES -----------------
+        
+        # Locksmith 
         pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_N))
         pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_S))
         pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_E))
         pieces.append(Piece2("Locksmith", CouleurPiece.JAUNE, FORME_IMPASSE_O))
 
-        # 3) Comissary : pareil
-        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_N))
-        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_S))
-        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_E))
-        pieces.append(Piece2("Comissary", CouleurPiece.JAUNE, FORME_IMPASSE_O))
+        # Commissary
+        pieces.append(Piece2("Commissary", CouleurPiece.JAUNE, FORME_ANGLE_SO))
+        pieces.append(Piece2("Commissary", CouleurPiece.JAUNE, FORME_ANGLE_ES))
+        pieces.append(Piece2("Commissary", CouleurPiece.JAUNE, FORME_ANGLE_NE))
+        pieces.append(Piece2("Commissary", CouleurPiece.JAUNE, FORME_ANGLE_ON))
+
+        # Kitchen 
+        pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_SO))
+        pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_ES))
+        pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_NE))
+        pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_ON))
 
         return pieces
             
@@ -144,7 +239,9 @@ class Pioche2 :
                 selection[0] = random.choice(pieces_cout_0)
         
         return selection
+    
     """
+
     def tirage_3_pieces(self, grille, x: int, y: int, dir_entree: str, boosts=None) -> List[Piece2]:
         # on ne garde que les pièces posables à cet endroit
         # 1) on garde seulement les pièces posables
@@ -155,13 +252,12 @@ class Pioche2 :
 
         tirage = random.sample(valides, k=min(3, len(valides)))
 
-        # 2) garantir coût 0
         if not any(p.cout_gemmes == 0 for p in tirage):
             gratuites = [p for p in valides if p.cout_gemmes == 0]
             if gratuites:
                 tirage[0] = random.choice(gratuites)
 
-        # 3) garantir une sortie vers le haut si on est TOUT EN BAS
+        
         est_derniere_ligne = (y == grille.hauteur - 1)
         if est_derniere_ligne:
             if not any(p.a_porte("N") for p in tirage):
@@ -171,30 +267,26 @@ class Pioche2 :
                     tirage[-1] = random.choice(candidates_nord)
 
         return tirage
-
+    
 
     def ajouter_piece_modele(self, modele: str | Piece2) -> None:
         """
         Permet à une pièce spéciale (Chamber of Mirrors, Pool, etc.)
-        d'ajouter dynamiquement un modèle dans la pioche.
-
-        - si on reçoit un Piece2 → on l'ajoute tel quel
-        - si on reçoit un str → on crée une pièce standard selon le nom
+        d'ajouter dynamiquement un modèle dans la pioche
         """
-        # 1) si c'est déjà une vraie pièce
+        # vraie pièce
         if isinstance(modele, Piece2):
             self.catalogue.append(modele)
             self._par_nom[modele.nom] = modele
             return
 
-        # 2) si c'est une chaîne → on essaie d'interpréter
+        #  chaîne  
         nom = modele
 
-        # si on l'a déjà, on ne duplique pas
         if nom in self._par_nom:
             return
 
-        # petit interpréteur très simple
+        #  interpréteur 
         nom_lower = nom.lower()
 
         if nom_lower in ("couloir_ns", "couloir-ns", "ns"):
@@ -206,7 +298,7 @@ class Pioche2 :
         elif nom_lower in ("croix", "cross", "plus"):
             p = Piece2("Dynamic Cross", CouleurPiece.BLEU, FORME_CROIX)
         else:
-            # valeur inconnue → on fait un carré par défaut
+            # valeur inconnue  on fait un carré par défaut
             p = Piece2(nom, CouleurPiece.BLEU, FORME_CARRE)
 
         self.catalogue.append(p)
