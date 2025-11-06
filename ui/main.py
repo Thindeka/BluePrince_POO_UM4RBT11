@@ -38,6 +38,20 @@ def main() :
         if input_handler.quit_requested :  
             running = False
             break
+        
+        # GAME OVER 
+        if game.state == "game_over":
+            if "deplacer" in actions:
+                dx, dy = actions["deplacer"]
+                if dx != 0:
+                    game.handle_navigation_game_over(dx)
+
+            if "confirmer" in actions:
+                game.handle_confirmation_game_over()
+
+            renderer.render_game_over(ecran, game)
+            pygame.display.flip()
+            continue
 
 
         
@@ -78,6 +92,7 @@ def main() :
             # AJOUTER ACTION ACHAT
 
         elif game.state == "achat":
+<<<<<<< HEAD
             # ENTER : acheter l'offre sélectionnée
             if "confirmer" in actions or 'ouvrir' in actions :
                 game.handle_confirmation_magasin()
@@ -86,12 +101,23 @@ def main() :
             if "annuler" in actions :
                 # on revient à l'exploration
                 game.handle_quitter_magasin()
-
-            elif "deplacer" in actions :
+=======
+            # Proposition des offres à choisir
+            if "deplacer" in actions:
                 dx, dy = actions["deplacer"]
-                if dx != 0:  # on ignore haut/bas
+                if dx != 0 or dy !=0:
                     game.handle_navigation_magasin(dx)
-      
+
+            # ENTER : acheter l'offre sélectionnée
+            if "confirmer" in actions or "ouvrir" in actions:
+                game.handle_confirmation_magasin()
+>>>>>>> 3fefd08 (changement fonction)
+
+            # ESC : quitter le magasin
+            if "annuler" in actions:
+                # on revient à l'exploration
+                game.handle_quitter_magasin()
+
 
         # affichage
         renderer.render(ecran, game)

@@ -58,6 +58,9 @@ class Game:
             # miroir
             self.grille.dict_portes(nx, ny)["S"].ouverte = True
 
+        # Fin de partei, rejouer ?
+        self.game_over_selection = 0  # 0 = Oui, 1 = Non
+        self.rejouer_options = ["Oui", "Non"]
 
 
     def handle_deplacement(self, dx : int, dy : int) -> None : # gestion globale du moove du jouer / différent de def dans classe grille qui gère les aspects spatiaux 
