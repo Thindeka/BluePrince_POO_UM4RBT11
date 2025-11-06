@@ -31,6 +31,7 @@ class Grille :
         self.__pieces = [[None for _ in range(self.__largeur)] for __ in range(self.__hauteur)]
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
         self.sortie = (2, 0)  # (x, y) => x=2, y=0
+        self.last_message = "" # dernier message temporaire à afficher à l'écran
 
 
     @property
@@ -146,6 +147,7 @@ class Grille :
         """"
         RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int)"""
         
+        message = None
         # on récupere la valeur associée a la cle (dx,dy)
         d = DIRECTIONS_REVERSE.get((dx, dy))
         if d is None or (dx == 0 and dy == 0) :   # Si (0,0) je ne fais rien
@@ -156,11 +158,15 @@ class Grille :
         
         if piece_actuelle is not None and not piece_actuelle.a_porte(d):
             # pas de porte dans cette direction → on ne tente même pas
+            message = f"Il n'y a pas de porte vers le {d}."
+            self.last_message = message
             return False, False, 0
 
         new_x, new_y = self.voisin(x, y, d)
 
         if not self.deplacement_permis(new_x, new_y) :   ### déplacement non permis (bords)
+            message = "Vous ne pouvez pas aller dans cette direction."
+            self.last_message = message
             return False, False, 0
 
         # porte séparant (x,y) et (new_x, new_y)
@@ -169,7 +175,9 @@ class Grille :
         if not porte.ouverte :    # porte fermee
             
             if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
-                print("Porte niveau", porte.niveau, "NON OUVERTE (pas de ressource)")
+                print("Porte niveau", porte.niveau, "NON OUVERTE (pas de ressource)")   
+                message = "Vous ne pouvez pas ouvrir cette porte (besoin d'une clé)."
+                self.last_message = message
                 return False, False, 0
             else:
                 print("Porte niveau", porte.niveau, "OUVERTE")

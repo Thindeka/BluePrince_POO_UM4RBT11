@@ -80,12 +80,12 @@ def main() :
         elif game.state == "achat":
             # ENTER : acheter l'offre sélectionnée
             if "confirmer" in actions or 'ouvrir' in actions :
-                game.handle_quitter_magasin()
+                game.handle_confirmation_magasin()
 
             # ESC : quitter le magasin
             if "annuler" in actions :
                 # on revient à l'exploration
-                game.handle_confirmation_magasin()
+                game.handle_quitter_magasin()
 
             elif "deplacer" in actions :
                 dx, dy = actions["deplacer"]

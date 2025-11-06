@@ -22,6 +22,7 @@ class Game:
         self.pioche_pieces = Pioche2()
         self.state : str = "exploration"  # autres états : "tirage", "victoire", "game_over", "achat"
         self.tour = 0  # compteur de tours
+        self.last_message = "" # dernier message temporaire à afficher à l'écran
         
         self.boosts_pioche_par_couleur : Dict[CouleurPiece, int] = {c : 0 for c in CouleurPiece}
         self.boosts_loot : Dict[str, int] = {
@@ -103,7 +104,6 @@ class Game:
 
         self._verifier_conditions_fin()  
 
-        
     def handle_choix_tirage (self, mvt : int) -> None :
 
         if self.state != "tirage" or not self.tirage_en_cours :
@@ -215,19 +215,30 @@ class Game:
         i = self.contexte_achat.get("index", 0)
         nom, prix, code = offres[i]
 
+        message = None
+
         if not self.inv.depenser_pieceOr(prix):  # on essaye de voir si on assez d or
-            return
+            message = "Vous n'avez pas assez de pièces d'or pour cet achat."
 
         # appliquer l'achat
         if code == "cle":
             self.inv.ramasser_cles(1)
+            message = "vous avez acheté une clé."
         elif code == "de":
             self.inv.ramasser_des(1)
+            message = "vous avez acheté un dé."
         elif code == "pomme":
             Pomme().appliquer(self.inv)
+            message = "vous avez acheté une pomme (+2 pas)."
         elif code == "pelle":
             self.inv.ajouter_obj_permanent(Pelle())
+            message = "vous avez acheté une pelle."
 
+        if message:
+            print("DEBUG MESSAGE ACHAT:", message)
+            self.last_message = message
+            return message
+        
         self.handle_quitter_magasin()
 
 

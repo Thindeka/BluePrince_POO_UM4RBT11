@@ -200,14 +200,15 @@ class Piece2 :
             return
 
         if "chapel" in nom or "chapelle" in nom:
-            # un peu d'or, c'est un lieu "positif"
-            inv.ramasser_pieceOr(2)
+            # un peu d'or, c'est un lieu "positif" 
+            inv.ramasser_pieceOr(2) ### pièce rouge avec normalement effet indésirable
             self.recompense_prise = True
             return
 
         if "garden" in nom or "veranda" in nom or "patio" in nom or "greenhouse" in nom :
             # gemme quasi systématique
             inv.ramasser_gemmes(1)
+            inv.ramasser_pieceOr(2)
 
             # parfois un objet consommable de 2.2
             if random.random() < 0.4:
@@ -249,7 +250,7 @@ class Piece2 :
             game.state = "shop"
             game.contexte_achat = {
                 "piece": self,
-                "offres": [
+                "offres": [             ### défini aussi dans la fonction entree_magasin de la classe Game, en double ??
                     ("Clé", 3, "cle"),
                     ("Dé", 4, "de"),
                     ("Pelle", 6, "pelle"),
@@ -328,7 +329,7 @@ class Piece2 :
 
         # Master Bedroom : regagne des pas au moment où on la choisit
         if "master bedroom" in nom:
-            inv.ramasser_pas(4)
+            inv.ramasser_pas(4) ### ca se répète avec l'effet d'entrée ?
 
         # Weight Room : retire des pas tout de suite
         if "weight room" in nom or "salle de sport" in nom:

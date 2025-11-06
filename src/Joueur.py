@@ -45,6 +45,12 @@ class Joueur:
         dx, dy = DIRECTIONS[direction]
         new_x, new_y = x + dx, y + dy
         
+        #if not grille.deplacement_permis(new_x, new_y):
+        #    return "Déplacement impossible dans cette direction."
+        
+        #if not grille.peut_entrer(new_x, new_y, self.inventaire):
+        #    return "Impossible d'entrer, vous n'avez pas de clés"
+
         if grille.deplacement_permis(new_x, new_y):
             self.position = new_x, new_y
             self.inventaire.utiliser_pas(1)  # Consomme 1 pas par déplacement

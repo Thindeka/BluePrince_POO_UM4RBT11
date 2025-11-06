@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 # gestion de la rareté des pieces 
 def correspondance_poids_rarete (rarete : int) -> int :
-    correspondances = {0 : 27, 1 : 9, 2 : 3, 3 : 1}
+    correspondances = {0 : 27, 1 : 9, 2 : 3, 3 : 1} # rarete : (0 à 3) : (commonplace, standard, unusual, rare)
     return correspondances.get(rarete, 1)
 
 
@@ -60,10 +60,10 @@ class Pioche2 :
 
 
         # Master Bedroom
-        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_S, cout_gemmes=1, rarete=1))
-        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_N, cout_gemmes=1, rarete=1))
-        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_E, cout_gemmes=1, rarete=1))
-        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_O, cout_gemmes=1, rarete=1))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_S, cout_gemmes=1, rarete=3))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_N, cout_gemmes=1, rarete=3))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_E, cout_gemmes=1, rarete=3))
+        pieces.append(Piece2("Master Bedroom", CouleurPiece.VIOLET, FORME_IMPASSE_O, cout_gemmes=1, rarete=3))
 
 
         # Nursery
@@ -136,32 +136,53 @@ class Pioche2 :
         pieces.append(Piece2("Greenhouse", CouleurPiece.VERT, FORME_IMPASSE_O, cout_gemmes=1))
 
         # Veranda
-        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_NS))
-        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_EO))
+        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_NS, rarete=2))
+        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_NS, rarete=2)) # afin de garder des chances de tirage équivalents aux autres pièces
+        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_EO, rarete=2))
+        pieces.append(Piece2("Veranda", CouleurPiece.VERT, FORME_COULOIR_EO, rarete=2)) # afin de garder des chances de tirage équivalents
 
-
+        # Secret Garden
+        pieces.append(Piece2("Garden", CouleurPiece.VERT, FORME_T_NES))
+        pieces.append(Piece2("Garden", CouleurPiece.VERT, FORME_T_ESO))
+        pieces.append(Piece2("Garden", CouleurPiece.VERT, FORME_T_SON))
+        pieces.append(Piece2("Garden", CouleurPiece.VERT, FORME_T_ONE))
        
 
-        # ----------------- PIECESS ROUGES -----------------
+        # ----------------- PIECES ROUGES -----------------
 
         # Furnace 
-        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_IMPASSE_S))
+        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_IMPASSE_N, rarete=3))
+        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_IMPASSE_S, rarete=3)) # afin de garder des chances de tirage équivalents aux autres pièces
+        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_IMPASSE_O, rarete=3))
+        pieces.append(Piece2("Furnace", CouleurPiece.ROUGE, FORME_IMPASSE_E, rarete=3)) 
 
         # Maid's Chamber
-        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_SO))
-        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_ES))
-        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_NE))
-        pieces.append(Piece2("MaidsChamber", CouleurPiece.VIOLET, FORME_ANGLE_ON))
-    
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.ROUGE, FORME_ANGLE_SO))
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.ROUGE, FORME_ANGLE_ES))
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.ROUGE, FORME_ANGLE_NE))
+        pieces.append(Piece2("MaidsChamber", CouleurPiece.ROUGE, FORME_ANGLE_ON))
+
+        # Chapel
+        pieces.append(Piece2("Chapel", CouleurPiece.ROUGE, FORME_T_NES))
+        pieces.append(Piece2("Chapel", CouleurPiece.ROUGE, FORME_T_ESO))
+        pieces.append(Piece2("Chapel", CouleurPiece.ROUGE, FORME_T_SON))
+        pieces.append(Piece2("Chapel", CouleurPiece.ROUGE, FORME_T_ONE))
+
+
 
 
         # ----------------- PIECESS ORANGES -----------------
         
         # Hallway
         pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_EO))
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_EO)) # afin de garder des chances de tirage équivalents aux autres pièces
         pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_NS))
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_NS)) # afin de garder des chances de tirage équivalents aux autres pièces
 
         # Passageway
+        pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_CROIX))
+        pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_CROIX)) # afin de garder des chances de tirage équivalents aux autres pièces
+        pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_CROIX))
         pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_CROIX))
 
         
