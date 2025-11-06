@@ -98,7 +98,7 @@ class Renderer:
         ecran.blit(self.small.render(f"État: {game.state}", True, (240, 180, 120)), (400, 60))
 
         # Message temporaire
-        if game.last_message:
+        if game.last_message :
             ecran.blit(self.small.render(game.last_message, True, (255, 255, 200)), (400, 80))
 
     def render_grille(self, ecran: pygame.Surface, game: "Game") -> None:
@@ -338,19 +338,8 @@ class Renderer:
 
     def render_game_over(self, ecran: pygame.Surface) -> None:
         w, h = ecran.get_size()
-
         txt = self.font_title.render("GAME OVER", True, (255, 50, 50))
-        ecran.blit(txt, (w // 2 - txt.get_width() // 2, h // 3))
-
-        font_small = pygame.font.Font(None, 48)
-        question = font_small.render("Play again ?", True, (255, 255, 255))
-        ecran.blit(question, (w // 2 - question.get_width() // 2, h // 2))
-
-        for i, opt in enumerate(self.rejouer_options):
-            color = (255, 255, 0) if i == self.game_over_selection else (180, 180, 180)
-            opt_txt = font_small.render(opt, True, color)
-            offset_x = (i - 0.5) * 200  
-            ecran.blit(opt_txt, (w // 2 + offset_x - opt_txt.get_width() // 2, h // 2 + 80))
+        ecran.blit(txt, (w // 2 - txt.get_width() // 2, h // 2 - txt.get_height() // 2))
 
     def render_victoire(self, ecran: pygame.Surface) -> None:
         w, h = ecran.get_size()

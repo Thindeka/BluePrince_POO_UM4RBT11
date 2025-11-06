@@ -31,7 +31,6 @@ class Grille :
         self.__pieces = [[None for _ in range(self.__largeur)] for __ in range(self.__hauteur)]
         self.__portes : Dict[Tuple[int,int], Dict[str, Porte]] = {}   # __portes[(x,y)] = {"S" : Porte(...), "E" : Porte(...), "O" : Porte)...}, 
         self.sortie = (2, 0)  # (x, y) => x=2, y=0
-        self.last_message = "" # dernier message temporaire à afficher à l'écran
 
 
     @property
@@ -147,11 +146,11 @@ class Grille :
         """"
         RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int)"""
         
-        message = None
+        message = ""
         # on récupere la valeur associée a la cle (dx,dy)
         d = DIRECTIONS_REVERSE.get((dx, dy))
         if d is None or (dx == 0 and dy == 0) :   # Si (0,0) je ne fais rien
-            return False, False, 0
+            return False, False, 0, message
 
         x,y = joueur.position
         piece_actuelle  = self.get_piece(x,y)
@@ -159,15 +158,13 @@ class Grille :
         if piece_actuelle is not None and not piece_actuelle.a_porte(d):
             # pas de porte dans cette direction → on ne tente même pas
             message = f"Il n'y a pas de porte vers le {d}."
-            self.last_message = message
-            return False, False, 0
+            return False, False, 0, message
 
         new_x, new_y = self.voisin(x, y, d)
 
         if not self.deplacement_permis(new_x, new_y) :   ### déplacement non permis (bords)
             message = "Vous ne pouvez pas aller dans cette direction."
-            self.last_message = message
-            return False, False, 0
+            return False, False, 0, message
 
         # porte séparant (x,y) et (new_x, new_y)
         porte = self.garantie_porte(x, y, d)
@@ -177,8 +174,7 @@ class Grille :
             if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
                 print("Porte niveau", porte.niveau, "NON OUVERTE (pas de ressource)")   
                 message = "Vous ne pouvez pas ouvrir cette porte (besoin d'une clé)."
-                self.last_message = message
-                return False, False, 0
+                return False, False, 0, message
             else:
                 print("Porte niveau", porte.niveau, "OUVERTE")
 
@@ -189,13 +185,13 @@ class Grille :
             # il faut assurer coherence entre les deux cases opposées pour garantir que l'on puisse faire des aller-retour sans consommer de ressources davantage
             # il faut faire le tirage aleatoire d piece si le côté opposé est vide
             if self.get_piece(new_x, new_y) is None :
-                return False, True, 0
+                return False, True, 0, message
         
         if self.get_piece(new_x, new_y) is not None :
             joueur.deplacer_coords((new_x-x, new_y-y), self)
-            return True, False, 1  # porte ouverte et si piece existe => deplacement
+            return True, False, 1, message  # porte ouverte et si piece existe => deplacement
         
-        return False, True, 0  # porte ouverte mais pas de piece => tirage 
+        return False, True, 0, message  # porte ouverte mais pas de piece => tirage 
 
 
     def objets_a_position(self, x, y):

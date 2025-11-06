@@ -71,8 +71,12 @@ class Game:
         if self.state != "exploration" :
             return  # deplacement impossible car on est pas en exploration
         
-        deplacement, ouverture, pas_consommes = self.grille.deplacer_joueur(self.joueur, self.inv, dx, dy) #  booeleens 
+        deplacement, ouverture, pas_consommes, message = self.grille.deplacer_joueur(self.joueur, self.inv, dx, dy) #  booeleens 
 
+        if message:
+            self.last_message = message
+            return message
+    
         if deplacement :
             if pas_consommes :
                 self.inv.utiliser_pas(pas_consommes)  # il faut consommer les pas si on s est deplacé
@@ -120,6 +124,7 @@ class Game:
 
     def handle_confirmation_tirage (self) -> None :
         
+        message = ""
         if self.state != "tirage" or not self.tirage_en_cours :
             return  
         
@@ -129,6 +134,8 @@ class Game:
         # gestion des gemmes 
         if piece.cout_gemmes > 0 :
             if not self.inv.depenser_gemmes(piece.cout_gemmes) :
+                message = "Vous n'avez pas assez de gemmes pour valider ce tirage."
+                self.last_message = message
                 return # on ne peut pas valider si on a pas assex de gemmes
             
 
@@ -189,12 +196,15 @@ class Game:
 
     
     def handle_re_tirage (self) -> None :
-        # avec un dé on peut relancer le tirage des pieces 
+        # avec un dé on peut relancer le tirage des pieces
+        message = "" 
         
         if self.state != "tirage" or not self.tirage_en_cours :
             return
 
         if not self.inv.depenser_des(1) :  # pas de dé pour faire le tirage
+            message = "Vous n'avez pas de dé pour relancer le tirage."
+            self.last_message = message
             return
 
         cible_x, cible_y = self.tirage_en_cours["cible"]
@@ -218,10 +228,12 @@ class Game:
         i = self.contexte_achat.get("index", 0)
         nom, prix, code = offres[i]
 
-        message = None
+        message = ""
 
         if not self.inv.depenser_pieceOr(prix):  # on essaye de voir si on assez d or
             message = "Vous n'avez pas assez de pièces d'or pour cet achat."
+            self.last_message = message
+            return
 
         # appliquer l'achat
         if code == "cle":
@@ -238,7 +250,6 @@ class Game:
             message = "vous avez acheté une pelle."
 
         if message:
-            print("DEBUG MESSAGE ACHAT:", message)
             self.last_message = message
             return message
         
