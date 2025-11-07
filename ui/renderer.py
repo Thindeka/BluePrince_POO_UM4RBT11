@@ -50,6 +50,15 @@ class Renderer:
 
    
     def render_hud(self, ecran: pygame.Surface, game: "Game") -> None:
+        """
+        Affiche de HUD en haut : 
+            - stats de base (pas/or/gemmes/clés/dés)
+            - objets permanents (liste de noms) si présente
+            - autres objets consommables (listes d'objets avec.nom) si présente
+            - pièce actuelle + état du jeu 
+            - message temporaire game.last_message (si défini)
+        On utilise getattr pour être tolérant si l'inventaire n'expose pas exactement les mêmes attributs
+        """
         inv = game.inv
         x, y = game.joueur.position
         piece = game.grille.get_piece(x, y)
@@ -62,6 +71,12 @@ class Renderer:
         ecran.blit(titre, (15, 8))
 
         # inventaire de base
+        pas = getattr(inv, "pas", 0)
+        pieces_or = getattr(inv, "piecesOr", 0)
+        gemmes = getattr(inv, "gemmes", 0)
+        cles = getattr(inv, "cles", 0)
+        des = getattr(inv, "des", 0)
+
         txt = (
             f"Pas: {inv.pas}   Or: {inv.piecesOr}   Gemmes: {inv.gemmes}   "
             f"Clés: {inv.cles}   Dés: {inv.des}"
@@ -71,16 +86,34 @@ class Renderer:
 
         # objets permanents
         y_perm = 65
-        if inv.noms_objets_permanents:
-            txt_perm = "Objets permanents: " + ", ".join(sorted(inv.noms_objets_permanents))
+        noms_perm = getattr(inv, "noms_objets_permanents", None)
+        if noms_perm:
+            if isinstance(noms_perm, (list, tuple)):
+                try:
+                    noms_display = [n if isinstance(n, str) else n for n in noms_perm]
+                    txt_perm = "Objets permanents: " + ", ".join(sorted(noms_display))
+                except Exception:
+                    txt_perm = "Objets permanents: (erreur affichage)"
+            else:
+                txt_perm = "Objets permanents: (aucun)"
         else:
             txt_perm = "Objets permanents: (aucun)"
         ecran.blit(self.small.render(txt_perm, True, (200, 200, 200)), (15, y_perm))
 
         # autres objets (pomme, etc.)
         y_autres = y_perm + 18
-        if inv.autres_objets:
-            noms = [o.nom for o in inv.autres_objets]
+        autres = getattr(inv, "autres_objets", None)
+        if autres:
+            noms = []
+            for o in autres:
+                nom = getattr(o, "nom", None)
+                if nom:
+                    noms.append(nom)
+                else:
+                    try:
+                        noms.append(str(o))
+                    except Exception:
+                        noms.append("<objet>")
             txt_autres = "Objets: " + ", ".join(noms)
         else:
             txt_autres = "Objets: (aucun)"
@@ -100,6 +133,8 @@ class Renderer:
         # Message temporaire
         if game.last_message :
             ecran.blit(self.small.render(game.last_message, True, (255, 255, 200)), (400, 80))
+
+
 
     def render_grille(self, ecran: pygame.Surface, game: "Game") -> None:
         grille = game.grille
