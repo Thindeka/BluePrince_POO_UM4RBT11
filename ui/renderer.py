@@ -369,10 +369,64 @@ class Renderer:
         ecran.blit(aide, (x + 16, y + panel_h - 30))
 
 
-    def render_game_over(self, ecran: pygame.Surface) -> None:
+    def render_game_over(self, ecran: pygame.Surface, selection: int = 0) -> None:
+        """
+        Affiche un écran 'Game Over' avec une capsule et le choix Rejouer Oui / Non.
+        selection : 0 = Oui, 1 = Non
+        """
         w, h = ecran.get_size()
-        txt = self.font_title.render("GAME OVER", True, (255, 50, 50))
-        ecran.blit(txt, (w // 2 - txt.get_width() // 2, h // 2 - txt.get_height() // 2))
+
+        # Fond semi-transparent noir
+        fond = pygame.Surface((w, h))
+        fond.set_alpha(180)
+        fond.fill((0, 0, 0))
+        ecran.blit(fond, (0, 0))
+
+        # Capsule centrale
+        capsule_w, capsule_h = 500, 300
+        rect = pygame.Rect(
+            (w - capsule_w) // 2,
+            (h - capsule_h) // 2,
+            capsule_w,
+            capsule_h
+        )
+        pygame.draw.rect(ecran, (30, 30, 30), rect, border_radius=20)
+        pygame.draw.rect(ecran, (200, 0, 0), rect, 4, border_radius=20)
+
+        # Titre
+        titre = self.font_title.render("GAME OVER", True, (255, 80, 80))
+        ecran.blit(titre, (w // 2 - titre.get_width() // 2, rect.y + 40))
+
+        # Message
+        msg = self.small.render("Vous ne pouvez plus avancer...", True, (255, 200, 200))
+        ecran.blit(msg, (w // 2 - msg.get_width() // 2, rect.y + 120))
+
+        # Choix Oui / Non
+        options = ["Oui", "Non"]
+        for i, opt in enumerate(options):
+            couleur = (255, 255, 255) if i != selection else (255, 200, 0)
+            texte = self.font.render(opt, True, couleur)
+            ecran.blit(texte, (w // 2 - 80 + i * 120, rect.y + 200))
+            
+    def handle_navigation_game_over(self, dx: int) -> None:
+        if self.state != "game_over":
+            return
+        self.game_over_selection = (self.game_over_selection + (1 if dx > 0 else -1)) % len(self.rejouer_options)
+
+    def handle_confirmation_game_over(self) -> None:
+        if self.state != "game_over":
+            return
+
+        choix = self.rejouer_options[self.game_over_selection]
+        if choix == "Oui":
+            # relancer le jeu
+            self.__init__()
+            self.last_message = "Nouvelle partie !"
+        else:
+            # quitter
+            self.state = "quit"
+            self.last_message = "Merci d’avoir joué !"
+
 
     def render_victoire(self, ecran: pygame.Surface) -> None:
         w, h = ecran.get_size()

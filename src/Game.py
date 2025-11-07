@@ -24,7 +24,6 @@ class Game:
         self.tour = 0  # compteur de tours
         self.last_message = "" # dernier message temporaire à afficher à l'écran
         
-        
         self.boosts_pioche_par_couleur : Dict[CouleurPiece, int] = {c : 0 for c in CouleurPiece}
         self.boosts_loot : Dict[str, int] = {
             "gemmes": 0,
@@ -357,13 +356,111 @@ class Game:
         }
         return correspondances[(dx, dy)]
 
+    def handle_navigation_game_over(self, dx: int) -> None:
+        """
+        Déplacement du curseur sur l’écran de Game Over (Oui / Non)
+        """
+        if self.state != "game_over":
+            return
+
+        # -1 = gauche / +1 = droite
+        self.game_over_selection = (self.game_over_selection + (1 if dx > 0 else -1)) % len(self.rejouer_options)
+
+
+    def handle_confirmation_game_over(self) -> None:
+        """
+        Valide le choix sur l’écran de Game Over.
+        """
+        if self.state != "game_over":
+            return
+
+        choix = self.rejouer_options[self.game_over_selection]
+
+        if choix == "Oui":
+            # Relancer une nouvelle partie
+            self.__init__()
+            self.last_message = "Nouvelle partie !"
+        else:
+            # Quitter le jeu proprement
+            self.state = "quit"
+            self.last_message = "Merci d’avoir joué !"
+            
+    def _diagnostic_blocage(self):
+        """
+        Affiche pourquoi le joueur est considéré bloqué : pour debug.
+        """
+        x, y = self.joueur.position
+        print("=== DIAGNOSTIC BLOCAGE ===")
+        print(f"Position joueur: {(x,y)}; Pas: {self.inv.pas}; Etat: {self.state}")
+        for dx, dy, name in [(0,-1,'N'),(0,1,'S'),(1,0,'E'),(-1,0,'O')]:
+            nx, ny = x+dx, y+dy
+            in_bounds = 0 <= nx < self.grille.largeur and 0 <= ny < self.grille.hauteur
+            print(f"Voisin {name} -> {(nx,ny)} ; in_bounds: {in_bounds}", end="")
+            if not in_bounds:
+                print(" (hors bornes)")
+                continue
+            piece = self.grille.get_piece(nx, ny)
+            portes = self.grille.dict_portes(nx, ny) if hasattr(self.grille, "dict_portes") else {}
+            print(f" | piece: {None if piece is None else piece.nom}", end="")
+            if portes:
+                for d, p in portes.items():
+                    print(f" | porte[{d}]: ouverte={getattr(p,'ouverte',None)} niveau={getattr(p,'niveau',None)}", end="")
+            else:
+                print(" | portes: (aucune)", end="")
+            # est-ce que la grille permet de s'y déplacer ?
+            try:
+                perm = self.grille.deplacement_permis(nx, ny)
+            except Exception as e:
+                perm = f"ERREUR deplacement_permis: {e}"
+            print(f" | deplacement_permis: {perm}")
+        print("=== FIN DIAGNOSTIC ===")
+
     def _verifier_conditions_fin(self) -> None :
         if self.inv.pas <= 0 :
             self.state = "game_over"
+            self.last_message = "Vous êtes épuisée... plus de pas disponibles !"
+        
             return 
         if self.joueur.position == self.grille.sortie :
             self.state = "victoire"
-            return 
+            self.last_message = "Bravo ! Vous avez trouvé la sortie !"
         
+            return 
+
+        # 3. Vérifier si le joueur est bloqué (aucun déplacement possible)
+        x, y = self.joueur.position
+        blocked = True
+
+        for dx, dy in [(0, -1), (0, 1), (1, 0), (-1, 0)]:
+            nx, ny = x + dx, y + dy
+            try:
+                if self.grille.deplacement_permis(nx, ny):
+                    blocked = False
+                    break
+            except Exception as e:
+                # En cas d'erreur, on considère la case non praticable
+                print(f"Erreur déplacement ({nx},{ny}) : {e}")
+
+        # 4. Si bloqué → afficher message et fin de partie
+        if blocked:
+            self.last_message = "Vous êtes complètement bloqué(e) — partie terminée."
+            print("=== DIAGNOSTIC BLOCAGE ===")
+            print(f"Position joueur : {self.joueur.position}")
+            for dx, dy, name in [(0, -1, 'Nord'), (0, 1, 'Sud'), (1, 0, 'Est'), (-1, 0, 'Ouest')]:
+                nx, ny = x + dx, y + dy
+                in_bounds = 0 <= nx < self.grille.largeur and 0 <= ny < self.grille.hauteur
+                print(f"{name} -> {(nx, ny)} (in_bounds={in_bounds})", end="")
+                if not in_bounds:
+                    print(" (hors limites)")
+                    continue
+                try:
+                    perm = self.grille.deplacement_permis(nx, ny)
+                except Exception as e:
+                    perm = f"Erreur : {e}"
+                print(f" | déplacement permis : {perm}")
+            print("=== FIN DIAGNOSTIC ===")
+
+            self.state = "game_over"
+            return    
 
 

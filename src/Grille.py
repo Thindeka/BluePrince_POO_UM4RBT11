@@ -142,9 +142,9 @@ class Grille :
 
     #### GESTION DEPLACEMENT JOUEUR
 
-    def deplacer_joueur (self, joueur : 'Joueur', inventaire : 'Inventaire', dx : int, dy : int) -> Tuple[bool, bool, int] :
+    def deplacer_joueur (self, joueur : 'Joueur', inventaire : 'Inventaire', dx : int, dy : int) -> Tuple[bool, bool, int, str] :
         """"
-        RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int)"""
+        RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int, MESSAGE : str)"""
         
         message = ""
         # on récupere la valeur associée a la cle (dx,dy)
@@ -164,6 +164,7 @@ class Grille :
 
         if not self.deplacement_permis(new_x, new_y) :   ### déplacement non permis (bords)
             message = "Vous ne pouvez pas aller dans cette direction."
+            print(f"[Grille] mouvement refusé : hors-limites {(new_x, new_y)}")
             return False, False, 0, message
 
         # porte séparant (x,y) et (new_x, new_y)
@@ -172,20 +173,18 @@ class Grille :
         if not porte.ouverte :    # porte fermee
             
             if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
-                print("Porte niveau", porte.niveau, "NON OUVERTE (pas de ressource)")   
-                message = "Vous ne pouvez pas ouvrir cette porte (besoin d'une clé)."
+                print(f"Porte niveau {porte.niveau} NON OUVERTE (pos {(x,y)} -> {(new_x,new_y)})") 
+                message = "Vous ne pouvez pas ouvrir cette porte (ressource manquante)."
                 return False, False, 0, message
             else:
-                print("Porte niveau", porte.niveau, "OUVERTE")
-
-            
-            porte.ouverte = True  # la porte peut etre ouverte
-            self.dict_portes(new_x, new_y)[OPPOSE[d]].ouverte = True
+                print(f"Porte niveau {porte.niveau} OUVERTE (pos {(x,y)} -> {(new_x,new_y)})")
+                porte.ouverte = True  # la porte peut etre ouverte
+                self.dict_portes(new_x, new_y)[OPPOSE[d]].ouverte = True
 
             # il faut assurer coherence entre les deux cases opposées pour garantir que l'on puisse faire des aller-retour sans consommer de ressources davantage
             # il faut faire le tirage aleatoire d piece si le côté opposé est vide
-            if self.get_piece(new_x, new_y) is None :
-                return False, True, 0, message
+                if self.get_piece(new_x, new_y) is None :
+                    return False, True, 0, message
         
         if self.get_piece(new_x, new_y) is not None :
             joueur.deplacer_coords((new_x-x, new_y-y), self)

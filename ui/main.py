@@ -84,7 +84,7 @@ def main() :
                 game.handle_confirmation_tirage()
 
             if 'relancer_tirage' in actions :
-                game.handle_confirmation_tirage()
+                game.handle_re_tirage()
 
             if 'annuler' in actions :
                 pass
