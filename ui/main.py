@@ -92,11 +92,7 @@ def main() :
             # AJOUTER ACTION ACHAT
 
         elif game.state == "achat":
-            # Proposition des offres à choisir
-            if "deplacer" in actions:
-                dx, dy = actions["deplacer"]
-                if dx != 0 or dy !=0:
-                    game.handle_navigation_magasin(dx)
+            
 
             # ENTER : acheter l'offre sélectionnée
             if "confirmer" in actions or "ouvrir" in actions:
@@ -106,7 +102,10 @@ def main() :
             if "annuler" in actions:
                 # on revient à l'exploration
                 game.handle_quitter_magasin()
-
+            elif "deplacer" in actions:
+                dx, dy = actions["deplacer"]
+                if dx != 0 or dy !=0:
+                    game.handle_navigation_magasin(dx)
 
         # affichage
         renderer.render(ecran, game)

@@ -130,11 +130,9 @@ class Renderer:
         # état du jeu
         ecran.blit(self.small.render(f"État: {game.state}", True, (240, 180, 120)), (400, 60))
 
-        # Message temporaire
-        if game.last_message :
-            ecran.blit(self.small.render(game.last_message, True, (255, 255, 200)), (400, 80))
-
-
+        # message temporaire  
+        if getattr(game, "last_message", ""):  
+            ecran.blit(self.small.render(game.last_message, True, (255, 255, 200)), (400, 80))  
 
     def render_grille(self, ecran: pygame.Surface, game: "Game") -> None:
         grille = game.grille

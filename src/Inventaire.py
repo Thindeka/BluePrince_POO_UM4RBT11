@@ -94,10 +94,13 @@ class Inventaire :
 
     def ramasser_pieceOr (self, n : int) -> None :
         self.piecesOr += max(0,n)  # on évite le comportement indésirables de faire un ajout avec un nombre négatif
-
-    def depenser_pieceOr (self, n : int) -> bool :
-        if self.piecesOr >= n and n >= 0 :
-            self.piecesOr -= max(0,n)
+    
+    def depenser_pieceOr(self, montant: int) -> bool:
+        """Dépenser 'montant' pièces d'or. Retourne True si dépense possible et réalisée, sinon False."""
+        if montant <= 0:
+            return False  # montant invalide
+        if self.piecesOr >= montant:
+            self.piecesOr -= montant
             return True
         return False
     

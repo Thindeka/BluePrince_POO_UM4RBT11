@@ -228,31 +228,24 @@ class Game:
         i = self.contexte_achat.get("index", 0)
         nom, prix, code = offres[i]
 
-        message = ""
-
         if not self.inv.depenser_pieceOr(prix):  # on essaye de voir si on assez d or
-            message = "Vous n'avez pas assez de pièces d'or pour cet achat."
-            self.last_message = message
+            self.last_message = "Vous n'avez pas assez de pièces d'or pour cet achat."
             return
 
         # appliquer l'achat
         if code == "cle":
             self.inv.ramasser_cles(1)
-            message = "vous avez acheté une clé."
+            self.last_message = "vous avez acheté une clé."
         elif code == "de":
             self.inv.ramasser_des(1)
-            message = "vous avez acheté un dé."
+            self.last_message = "vous avez acheté un dé."
         elif code == "pomme":
             Pomme().appliquer(self.inv)
-            message = "vous avez acheté une pomme (+2 pas)."
+            self.last_message = "vous avez acheté une pomme (+2 pas)."
         elif code == "pelle":
             self.inv.ajouter_obj_permanent(Pelle())
-            message = "vous avez acheté une pelle."
+            self.last_message = "vous avez acheté une pelle."
 
-        if message:
-            self.last_message = message
-            return message
-        
         self.handle_quitter_magasin()
 
 
