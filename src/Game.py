@@ -24,6 +24,7 @@ class Game:
         self.tour = 0  # compteur de tours
         self.last_message = "" # dernier message temporaire à afficher à l'écran
         
+        
         self.boosts_pioche_par_couleur : Dict[CouleurPiece, int] = {c : 0 for c in CouleurPiece}
         self.boosts_loot : Dict[str, int] = {
             "gemmes": 0,
@@ -62,6 +63,31 @@ class Game:
         self.game_over_selection = 0  # 0 = Oui, 1 = Non
         self.rejouer_options = ["Oui", "Non"]
 
+    def _verifier_conditions_fin(self):
+        # Vérifie si le joueur a plus de pas
+        if self.inv.pas <= 0:
+            self.state = "game_over"
+            self.last_message = "Vous n'avez plus de pas — partie terminée."
+            return
+
+        # Vérifie si le joueur est bloqué
+        x, y = self.joueur.position
+        blocked = True
+        for dx, dy in [(0,-1),(0,1),(1,0),(-1,0)]:
+            nx, ny = x+dx, y+dy
+            if self.grille.deplacement_permis(nx, ny):
+                blocked = False
+                break
+        if blocked:
+            self.last_message = "Vous êtes entouré(e) — partie terminée."
+            self.state = "game_over"
+            return
+
+        # Vérifie si le joueur atteint la sortie
+        if self.joueur.position == self.grille.sortie:
+            self.state = "victoire"
+            self.last_message = "Félicitations ! Vous avez trouvé la sortie."
+            return
 
     def handle_deplacement(self, dx : int, dy : int) -> None : # gestion globale du moove du jouer / différent de def dans classe grille qui gère les aspects spatiaux 
         """
