@@ -31,7 +31,21 @@ class CouleurPiece(Enum) :
 
 
 class FormePiece :
-    """ correspond a l meplacement des portes de la piece """
+    """ 
+    Correspond a l'emplacement des portes de la pièce 
+
+    Attributs
+    ---------
+    nom : str
+        Nom de la forme de la pièce.
+    ens_portes : Set[str]
+        Ensemble des directions ('N', 'S', 'E', 'O') où se trouvent les portes.
+
+    Méthodes
+    -------
+    a_porte(direction: str) -> bool
+        Vérifie si la pièce a une porte dans la direction donnée.
+    """
     nom : str
     ens_portes : Set[str]
 
@@ -75,7 +89,46 @@ FORME_T_ONE = FormePiece("t_one", {"O", "N", "E"})
 
 
 class Piece2 :
-    """ 
+    """
+    Représente les pièces du jeu.
+
+    Attributs
+    ---------
+    nom : str
+        The name of the piece.
+    couleur : CouleurPiece
+        couleur des pièces, réprente le type.
+    jaune : JaunePiece
+        Spécifique aux pièces jaunes (shops).
+    vert : VertPiece 
+        Spécifique aux pièces vertes (gardens).
+    forme (FormePiece): The shape of the piece.
+    cout_gemmes (int): The cost in gems to draw the piece (default is 0).
+    rarete (int): The rarity of the piece influencing the probability of drawing it (0 to 3).
+    tags (list): A list of tags associated with the piece for special effects.
+    contenu (list[str]): A list to hold the contents of the piece.
+    recompense_prise (bool): Indicates if the piece has been rewarded upon entry.
+    or_dans_piece (int): The amount of gold in the piece.
+    Methods:
+        a_porte(direction: str) -> bool:
+            Checks if the piece has a door in the specified direction.
+        peut_etre_posee(grille: 'Grille', x: int, y: int, dir_entree: str) -> bool:
+            Verifies if the piece can be placed on the grid at the specified coordinates.
+        poser_piece(grille: 'Grille', x: int, y: int) -> None:
+            Places the piece on the grid and opens the corresponding doors.
+        effet_entree(game: 'Game') -> None:
+            Applies effects when the piece is entered by the player.
+        effet_tirage(game: 'Game') -> None:
+            Applies effects when the piece is drawn from the deck.
+        effet_dispersion(game: 'Game') -> None:
+            Disperses resources to neighboring pieces.
+        effet_modif_pioche(game: 'Game') -> None:
+            Modifies the chances of drawing certain colors after placing the piece.
+        effet_modif_objets(game: 'Game') -> None:
+            Increases the chances of finding certain objects later.
+        effet_ajout_catalogue(game: 'Game') -> None:
+            Adds other pieces to the drawing pool based on specific conditions.
+
     nom : str
     couleur : CouleurPiece
     jaune : JaunePiece  # uniquement pour les pieces jaunes (magasins)
