@@ -19,7 +19,16 @@ class InputHandler :
     """
     Gestion des touches
     Pas de logique de jeu
-    On renvoie qu ece que le joueur veut faire à ce laps de temps
+    On renvoie uniquement ce que le joueur veut faire dans ce laps de temps
+
+    Paramètres
+    ----------
+    None
+
+    Attributs
+    ---------
+    _quit : bool
+        Indique si le joueur a demandé à quitter le jeu.
     """
 
     def __init__(self) -> None:
@@ -34,7 +43,15 @@ class InputHandler :
 
     def actions (self) -> dict :
         """
-        Retour :
+        Lit les événements pygame et détermine les intentions du joueur.
+
+        Paramètres
+        ----------
+        None
+
+        Returns
+        -------
+        intentions : dict
         {
         'deplacer': (dx, dy),           # déplacement validé 
         'ouvrir': True,                 
@@ -43,9 +60,9 @@ class InputHandler :
         'relancer_tirage': True,        # SPACE (relancer un tirage)
         'annuler': True,                # ESC
         }
-        mise à vide pour le laps suivant
 
         """
+
         intentions = {}
 
         for event in pygame.event.get() :

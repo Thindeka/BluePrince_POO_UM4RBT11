@@ -34,6 +34,32 @@ def correspondance_poids_rarete (rarete : int) -> int :
 
 
 class Pioche2 :
+    """Gestion de la pioche de pièces.
+
+    Attributs
+    ---------
+    catalogue : List[Piece2]
+        Liste des Piece2 disponibles (modèles).
+    bonus_couleur : Dict[int, float] 
+        Multiplicateur de poids.
+    _constructeurs : Dict[str, Callable[[], Piece2]]
+        Constructeurs rapides pour quelques pièces spéciales.
+    _par_nom : Dict[str, Piece2]
+        Index des pièces par nom pour recherches/ajouts rapides.
+
+    Méthodes
+    -------
+    _creer_catalogue() -> List[Piece2]
+        Construit la liste initiale de modèles.
+    _garder_pieces_compatibles(grille, x, y, dir_entree): 
+        Filtre les pièces posables.
+    _poids(piece) -> float 
+        Calcule le poids de tirage d'une pièce.
+    tirage_3_pieces(...) -> List[Piece2]
+        Renvoie jusqu'à 3 pièces proposées pour un emplacement.
+    ajouter_piece_modele(modele) -> None
+        Ajoute un modèle par instance ou par nom.
+    """
 
     def __init__(self) -> None : 
         self.catalogue : List[Piece2] = self._creer_catalogue()
@@ -151,7 +177,7 @@ class Pioche2 :
         pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
         pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
         pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        
+
 
 
         # ----------------- PIECESS VERTES -----------------
@@ -298,9 +324,31 @@ class Pioche2 :
     """
 
     def tirage_3_pieces(self, grille, x: int, y: int, dir_entree: str, boosts=None) -> List[Piece2]:
-        # on ne garde que les pièces posables à cet endroit
-        # 1) on garde seulement les pièces posables
-        # 1) pièces posables
+        """
+        Tirage de 3 pièces possibles pour un emplacement donné.
+
+        Paramètres
+        ----------
+        grille : Grille
+            grille actuelle du jeu.
+        x : int
+        y : int
+        dir_entree : str
+            Direction d'entrée ('N', 'S', 'E', 'O').
+        boosts : Dict[CouleurPiece, int] Defaults to None
+            Bonus de poids par couleur.
+
+        Returns
+        -------
+            List[Piece2]: Liste des pièces proposées (jusqu'à 3).
+
+        Notes
+        -----
+        on ne garde que les pièces posables à cet endroit
+        1) on garde seulement les pièces posables
+        1) pièces posables
+        """
+
         valides = [p for p in self.catalogue if p.peut_etre_posee(grille, x, y, dir_entree)]
         if not valides:
             return []
@@ -326,8 +374,19 @@ class Pioche2 :
 
     def ajouter_piece_modele(self, modele: str | Piece2) -> None:
         """
-        Permet à une pièce spéciale (Chamber of Mirrors, Pool, etc.)
-        d'ajouter dynamiquement un modèle dans la pioche
+        Ajoute un modèle dans la pioche.
+
+        Paramètres
+        ----------
+        modele : str | Piece2
+            - Si c'est une instance de Piece2, elle est ajoutée telle quelle.
+            - Si c'est une chaîne, on tente d'ajouter un modèle correspondant
+              (utilisant éventuellement self._constructeurs si défini) ou
+              on crée une pièce par défaut à partir du nom.
+
+        Returns
+        -------
+            None
         """
         # vraie pièce
         if isinstance(modele, Piece2):

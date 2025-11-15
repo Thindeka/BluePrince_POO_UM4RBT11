@@ -24,7 +24,12 @@ class AutreObjet :
 
 
 class Pomme(AutreObjet):
-    """ Redonne 2 pas """
+    """ 
+    Classe fille de AutreObjet représentant une pomme.
+    Effet : Redonne 2 pas 
+    
+    """
+
     nom = "pomme"
 
     def appliquer(self, inv: 'Inventaire'):
@@ -45,7 +50,10 @@ class Pomme(AutreObjet):
 
 
 class Banane(AutreObjet):
-    """ Redonne 3 pas """
+    """ 
+    Classe fille de AutreObjet représentant une banane.
+    Effet : Redonne 3 pas 
+    """
     nom = "banane"
 
     def appliquer(self, inv: 'Inventaire'):
@@ -66,7 +74,10 @@ class Banane(AutreObjet):
 
 
 class Gateau(AutreObjet):
-    """ Redonne 10 pas """
+    """ 
+    Classe fille de AutreObjet représentant un gâteau.
+    Effet : Redonne 10 pas 
+    """
     nom = "gateau"
 
     def appliquer(self, inv: 'Inventaire'):
@@ -87,7 +98,10 @@ class Gateau(AutreObjet):
 
 
 class Sandwich(AutreObjet):
-    """ Redonne 15 pas """
+    """ 
+    Classe fille de AutreObjet représentant un sandwich.
+    Effet : Redonne 15 pas 
+    """
     nom = "sandwich"
 
     def appliquer(self, inv: 'Inventaire'):
@@ -108,7 +122,10 @@ class Sandwich(AutreObjet):
 
 
 class Repas(AutreObjet):
-    """ Redonne 25 pas """
+    """ 
+    Classe fille de AutreObjet représentant un repas.
+    Effet : Redonne 25 pas 
+    """
     nom = "repas"
 
     def appliquer(self, inv: 'Inventaire'):
@@ -129,7 +146,32 @@ class Repas(AutreObjet):
 
 
 class Coffre :
-    """Coffre qu'on peut ouvrir avec une clé ou un marteau."""
+    """Coffre ouvrable avec une clé ou un marteau.
+    Contient un nombre aléatoire d'AutreObjet.
+
+    Paramètres
+    -----------
+    min_objets : int
+        Nombre minimum d'objets à générer lors de l'ouverture.
+    max_objets : int
+        Nombre maximum d'objets à générer lors de l'ouverture.
+    contenu_possibles : Optional[List[Optional[AutreObjet]]]
+        Liste d'objets possibles (None représente un emplacement vide).
+
+    Attributs
+    ---------
+    contenu_possibles : List[AutreObjet] 
+        Objets disponibles dans le coffre.
+    nb_objets : int
+        Nombre d'objets qui seront tirés aléatoirement à l'ouverture.
+
+    Méthodes
+    --------
+    ouvrir(inv: Inventaire) -> str
+        Tente d'ouvrir le coffre en appelant 'inv.ouvrir_coffre()'.
+        Si l'ouverture échoue, renvoie un message d'erreur.
+        Sinon applique les objets trouvés à l'inventaire et retourne un résumé des objets récupérés.
+    """
     
     def __init__(self, min_objets: int = 1, max_objets: int = 3, contenu_possibles: Optional[List[AutreObjet]] = None):
         # Par défaut, le coffre peut contenir un des objets consommables
@@ -154,8 +196,26 @@ class Coffre :
 
 
 class Casier:
-    ####### implementer fait que juste contenu dans piece vestiaire
-    """Casier qu'on peut ouvrir uniquement avec une clé."""
+    """Casier ouvrable uniquement avec une clé dans la pièce vestiaire.
+
+    Paramètres
+    -----------
+    min_objets (int): nombre minimum d'objets à générer lors de l'ouverture.
+    max_objets (int): nombre maximum d'objets à générer lors de l'ouverture.
+    contenu_possibles (Optional[List[Optional[AutreObjet]]]): liste d'objets possibles (None représente un emplacement vide).
+
+    Attributs
+    ---------
+    contenu_possibles (List[Optional[AutreObjet]]): options d'objets disponibles dans le casier.
+    nb_objets (int): nombre d'objets qui seront tirés aléatoirement à l'ouverture.
+
+    Méthodes
+    --------
+    ouvrir_casier(inv: Inventaire) -> str
+        Tente d'ouvrir le casier en dépensant une clé depuis l'inventaire `inv`.
+        Si la clé manque, renvoie un message d'erreur.
+        Sinon, applique les objets trouvés à l'inventaire et retourne un résumé des objets récupérés.
+    """
     
     def __init__(self, min_objets: int = 1, max_objets: int = 2, contenu_possibles: Optional[List[Optional[AutreObjet]]] = None):
         if contenu_possibles is None:
@@ -181,7 +241,22 @@ class Casier:
 
 
 class EndroitCreuser:
-    """Endroit où creuser avec une pelle pour trouver des objets."""
+    """
+    Représente un endroit où le joueur peut creuser pour trouver des objets.
+    Paramètres
+    -----------
+    min_objets (int): nombre minimum d'objets à générer lors du creusage.
+    max_objets (int): nombre maximum d'objets à générer lors du creusage.
+    contenu_possibles (Optional[List[Optional[AutreObjet]]]): liste d'objets possibles (None représente un emplacement vide).
+    Attributs
+    ---------
+        contenu_possibles (List[Optional[AutreObjet]]): Liste des objets pouvant être trouvés.
+        nb_objets (int): Nombre d'objets à trouver lors du creusage.
+    Méthodes
+    ---------
+        creuser(inv: 'Inventaire') -> str: 
+            Permet de creuser si le joueur possède une pelle et retourne les objets trouvés.
+    """
     
     def __init__(self, min_objets: int = 1, max_objets: int = 2, contenu_possibles: Optional[List[Optional[AutreObjet]]] = None):
         if contenu_possibles is None:
@@ -191,6 +266,7 @@ class EndroitCreuser:
 
     def creuser(self, inv: 'Inventaire'):
         """Creuse si le joueur possède une pelle."""
+
         if not inv.creuser() :
             return " Vous avez besoin d'une pelle pour creuser."
         

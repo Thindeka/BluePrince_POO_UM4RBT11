@@ -102,41 +102,41 @@ class Piece2 :
         Spécifique aux pièces jaunes (shops).
     vert : VertPiece 
         Spécifique aux pièces vertes (gardens).
-    forme (FormePiece): The shape of the piece.
-    cout_gemmes (int): The cost in gems to draw the piece (default is 0).
-    rarete (int): The rarity of the piece influencing the probability of drawing it (0 to 3).
-    tags (list): A list of tags associated with the piece for special effects.
-    contenu (list[str]): A list to hold the contents of the piece.
-    recompense_prise (bool): Indicates if the piece has been rewarded upon entry.
-    or_dans_piece (int): The amount of gold in the piece.
-    Methods:
-        a_porte(direction: str) -> bool:
-            Checks if the piece has a door in the specified direction.
-        peut_etre_posee(grille: 'Grille', x: int, y: int, dir_entree: str) -> bool:
-            Verifies if the piece can be placed on the grid at the specified coordinates.
-        poser_piece(grille: 'Grille', x: int, y: int) -> None:
-            Places the piece on the grid and opens the corresponding doors.
-        effet_entree(game: 'Game') -> None:
-            Applies effects when the piece is entered by the player.
-        effet_tirage(game: 'Game') -> None:
-            Applies effects when the piece is drawn from the deck.
-        effet_dispersion(game: 'Game') -> None:
-            Disperses resources to neighboring pieces.
-        effet_modif_pioche(game: 'Game') -> None:
-            Modifies the chances of drawing certain colors after placing the piece.
-        effet_modif_objets(game: 'Game') -> None:
-            Increases the chances of finding certain objects later.
-        effet_ajout_catalogue(game: 'Game') -> None:
-            Adds other pieces to the drawing pool based on specific conditions.
-
-    nom : str
-    couleur : CouleurPiece
-    jaune : JaunePiece  # uniquement pour les pieces jaunes (magasins)
-    vert : VertPiece  # uniquement pour les pieces vertes (jardins)
     forme : FormePiece
-    cout_gemmes : int = 0   # cout en gemmes a deoenser pour tirer la piece
-    rarete : int = 0  # influence proba de tirer une piece, (0 à 3) : (commonplace, standard, unusual, rare)
-    # image (a voir apres)
+        Format ds pièces
+    cout_gemmes: int
+        Coût en gemmes pour obtenir la pièce (default à 0).
+    rarete : int
+        Indique la rareté de la pièce et donc sa probabilité de tirage (0 à 3) : (commonplace, standard, unusual, rare).
+    tags : list
+        Une liste de balises associées à la pièce pour les effets spéciaux.
+    contenu : list[str]
+        Liste des contenus spéciaux de la pièce (ex: "Casier", "Endroit à creuser").
+    recompense_prise : bool
+        Indique si la récompense de la pièce a déjà été prise.
+    or_dans_piece : int
+        Quantité d'or contenue dans la pièce.
+
+    Méthodes
+    -------
+    a_porte(direction: str) -> bool:
+        Vérifie si la pièce a une porte dans la direction spécifiée.
+    peut_etre_posee(grille: “Grille”, x: int, y: int, dir_entree: str) -> bool:
+        Vérifie si la pièce peut être placée sur la grille aux coordonnées spécifiées.
+    poser_piece(grille: “Grille”, x: int, y: int) -> None:
+        Place la pièce sur la grille et ouvre les portes correspondantes.
+    effet_entree(game: “Game”) -> None:
+        Applique des effets lorsque le joueur entre dans la pièce.
+    effet_tirage(game: “Game”) -> None:
+        Applique des effets lorsque la pièce est tirée de la pioche.
+    effet_dispersion(game: “Game”) -> None:
+        Disperse les ressources vers les pièces voisines.
+    effet_modif_pioche(game: “Game”) -> None:
+        Modifie les chances de tirer certaines couleurs après avoir placé la pièce.
+    effet_modif_objets(game: “Game”) -> None:
+        Augmente les chances de trouver certains objets plus tard.
+    effet_ajout_catalogue(game: “Game”) -> None:
+        Ajoute d'autres pièces au pool de tirage en fonction de conditions spécifiques.
     """
 
     def __init__(self, nom: str, couleur : CouleurPiece, forme : FormePiece, cout_gemmes=0, rarete=0, tags=None) -> None:
@@ -158,7 +158,27 @@ class Piece2 :
     
 
     def peut_etre_posee (self, grille : 'Grille', x : int, y : int, dir_entree : str) -> bool :
-        """ verification pour le tirage 2.7 
+        """
+        Vérifie si la pièce peut être posée en (x, y) venant de dir_entree.
+
+        Paramètres
+        ----------
+        grille : Grille
+            Objet Grille utilisé pour vérifier voisins et limites.
+        x, y : int
+            Coordonnées de la case cible.
+        dir_entree : str
+            Direction d'arrivée (doit être une des DIRECTIONS) ; la pièce doit avoir une porte à cet emplacement.
+        
+        Returns
+        ------
+        bool
+            True si la pose est valide : la porte d'entrée existe, toutes les portes de la pièce restent dans les limites
+            de la grille, et toute porte présente chez un voisin est réciproquée par la pièce. False sinon.
+        
+        Notes
+        -----
+        verification pour le tirage 2.7 
             -> piece doit avoir une porte du cote de l arrivee
             -> chaque porte de la piece doit etre dans les bornes
             -> si un voisin existe avec une porte vers la case actuelle, il faut avoir la porte de retour
@@ -195,8 +215,23 @@ class Piece2 :
     
 
     def poser_piece (self, grille : 'Grille', x : int, y : int) -> None :
-        """" On pose la piece et on ouvre les portes 'mirroirs' """
-        
+        """ 
+        On pose la pièce, on modifie l'état de la grille.
+
+        Paramètres
+        ----------
+        grille : Grille
+            L'objet Grille sur lequel la pièce est posée.
+        x : int
+            La coordonnée x où la pièce est posée.
+        y : int
+            La coordonnée y où la pièce est posée.
+
+        Returns
+        -------
+        None
+        """
+
         grille.placer_piece(x,y,self) 
         
         for d in self.forme.ens_portes :
@@ -224,6 +259,18 @@ class Piece2 :
 
     
     def effet_entree (self, game : 'Game') :
+        """
+        Applique des effets lorsque le joueur entre dans la pièce.
+
+        Paramètres
+        ----------
+        game : Game
+            L'objet Game qui contient l'état actuel du jeu.
+
+        Returns
+        -------
+        None
+        """
         
         inv : 'Inventaire' = game.inv
         x, y = game.joueur.position

@@ -10,7 +10,6 @@ class Porte :
     
     """
 
-
     def __init__(self, niveau : int = 0, ouverte : bool =False) :
         self.__niveau = niveau
         self.ouverte = ouverte 

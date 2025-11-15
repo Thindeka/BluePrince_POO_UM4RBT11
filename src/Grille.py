@@ -22,8 +22,55 @@ OPPOSE = {"N" : "S", "S" : "N", "E" : "O", "O" : "E"}
 
 
 class Grille :
+    """
+    Représente la grille du manoir — gère les pièces, les portes et les déplacements du joueur.
 
-    """ Représente le manoir """
+    Paramètres
+    ----------
+    largeur : int
+        Nombre de colonnes (axe x), défaut 5.
+    hauteur : int
+        Nombre de lignes (axe y), défaut 9.
+
+    Attributs
+    ---------
+    __largeur : int
+    __hauteur : int
+    __pieces : list[list[Piece2 | None]]
+        Matrice des pièces indexée par [y][x].
+    __portes : Dict[Tuple[int,int], Dict[str, Porte]]
+        Portes par case et direction.
+    sortie : Tuple[int,int]
+        Coordonnées de la sortie.
+
+    Méthodes
+    --------
+    largeur(), hauteur(), pieces(), portes() 
+        Propriétés d'accès.
+    placer_piece(x, y, piece) -> None 
+        Place une pièce aux coordonnées données.
+    get_piece(x, y) -> Piece2 | None 
+        Retourne la pièce à (x,y) ou None.
+    deplacement_permis(x, y) -> bool
+        Indique si (x,y) est dans les bornes.
+    dict_portes(x, y) -> Dict[str, Porte]
+        Récupère (ou crée) le dict de portes pour une case.
+    voisin(x, y, direction) -> Tuple[int,int]
+        Calcule la case voisine selon DIRECTIONS.
+    niveau_porte(y) -> int
+        Calcule un niveau de porte (logique probabiliste selon la rangée).
+    garantie_porte(x, y, direction, niveau=None) -> Porte
+        Crée/synchronise la porte et son miroir.
+    deplacer_joueur(joueur, inventaire, dx, dy) -> (bool, bool, int, str)
+       Tente un déplacement et gère l'ouverture de porte (retour : (déplacé, ouverture_effectuée, pas_consumés, message)).
+    objets_a_position(x, y)
+        Retourne la liste d'objets présents si une pièce existe.
+
+    Notes
+    -----
+    - Directions valides : 'N','S','E','O'.
+    - Coordonnées : (x, y) avec origine en haut à gauche.
+    """
 
     def __init__(self, largeur=5, hauteur=9) :
         self.__largeur = largeur
@@ -85,10 +132,20 @@ class Grille :
        
 
     def niveau_porte(self, y : int) -> int :
-        """ Statut aléatoire sauf pour rangée du bas et du haut 
-        peut etre optimisee 
         """
-        
+        Statut aléatoire sauf pour rangée du bas et du haut
+
+        Paramètres
+        ----------
+        y : int 
+            hauteur de la grille
+
+        Returns
+        -------
+        p0, p1, p2 : int
+            probabilités associés aux niveaux de la porte (0, 1 ou 2)
+        """      
+         
         y = max(0, min(self.__hauteur - 1, y))  # on s'assure qu y est dans les bornes
         
         if y == self.__hauteur - 1 :   # rangée du bas
@@ -110,8 +167,26 @@ class Grille :
 
 
     def garantie_porte (self, x : int, y : int, direction : str, niveau=None) -> 'Porte' :
-        """ Retourne la porte demandée (et son mirroir) en s'assurant qu'elle existe bien avant de l'utiliser
+        """
+        Retourne la porte demandée (et son mirroir) en s'assurant qu'elle existe bien avant de l'utiliser
         Initialisation paresseuse
+        Paramètres
+        ----------
+        x : int
+            Coordonnée x (colonne) de la case courante.
+        y : int
+            Coordonnée y (ligne) de la case courante.
+        direction : str
+            Direction depuis la case courante vers la case voisine (doit être un identifiant reconnu
+            par self.voisin et présent dans la table OPPOSE).
+        niveau : int | None, optionnel
+            Niveau de la porte à créer. Si None, le niveau est déterminé paresseusement via
+            self.niveau_porte(new_y) (où new_y est la coordonnée y du voisin).
+        
+        Returns
+        -------
+        Porte
+            L'objet Porte correspondant à la porte depuis la case (x, y) dans la direction fournie.
         """
 
         # 1) trouver le voisin
@@ -148,8 +223,29 @@ class Grille :
     #### GESTION DEPLACEMENT JOUEUR
 
     def deplacer_joueur (self, joueur : 'Joueur', inventaire : 'Inventaire', dx : int, dy : int) -> Tuple[bool, bool, int, str] :
-        """"
-        RETOURNE (DEPLACEMENT : bool, OUVERTURE_PORTE : bool, PAS_COSOMMES : int, MESSAGE : str)"""
+        """
+        Déplace le joueur d'une case selon un vecteur (dx, dy), en gérant l'ouverture des portes
+        et le tirage éventuel d'une nouvelle pièce.
+
+        Paramètres
+        ----------
+        joueur : Joueur
+            Objet représentant le joueur ; sa position est modifiée si le déplacement est effectué.
+        inventaire : Inventaire
+            Inventaire utilisé pour tenter d'ouvrir une porte (consommation de ressources selon le niveau).
+        dx : int
+            Déplacement relatif en x (colonne).
+        dy : int
+            Déplacement relatif en y (ligne).
+
+        Returns
+        ------
+        Tuple[bool, bool, int, str]
+            - deplacement (bool) : True si le joueur a effectivement été déplacé.
+            - ouverture_porte (bool) : True si une porte a été ouverte lors de la tentative (et qu'il faut éventuellement tirer une pièce).
+            - pas_consommes (int) : Nombre de pas consommés (1 si déplacement effectué, 0 sinon).
+            - message (str) : Message à destination de l'utilisateur expliquant l'issue de l'action (vide si pas d'information).
+        """
         
         message = ""
         # on récupere la valeur associée a la cle (dx,dy)

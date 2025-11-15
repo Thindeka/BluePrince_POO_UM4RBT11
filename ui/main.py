@@ -16,6 +16,18 @@ FPS = 60
 
 
 def main() :
+    """
+    Fonction principale du jeu.
+    Initialise pygame, crée les objets principaux et lance la boucle de jeu.
+
+    Paramètres
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     pygame.init()
     ecran = pygame.display.set_mode((LARGEUR_ECRAN, HAUTEUR_ECRAN))  
     pygame.display.set_caption('BluePrince')  # caption pour l'écran

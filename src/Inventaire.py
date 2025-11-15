@@ -11,25 +11,26 @@ if TYPE_CHECKING :
 
 @dataclass
 class Inventaire :
-    """ 
-    
+    """
     Inventaire du joueur ou de la joueuse 
     
-    Objets consommables : 
+    Objets consommables
+    ---------------
     - pas  -> initialement à 70, le joueur ou la joueuse perd 1 pas à chaque déplacement (passer d'une pièce à une autre)
     - piecesOr -> initialement à 0, le joueur ou la joueuse peut ramasser des pièces dans le manoir, et les dépenser dans certaines salles en échange d'autres objets
     - gemmes -> initialement à 2, le joueur ou la joueuse peut ramasser des gemmes dans le manoir, et les dépenser pour choisir certaines salles lors du tirage au sort.
     - cles -> initialement à 0, le joueur ou la joueuse peut ramasser des clés dans le manoir, et les dépenser pour ouvrir des portes fermées à clé, ou des coffres pouvant contenir des objets.
     - des ->  initialement à 0, le joueur ou la joueuse peut ramasser des dés dans le manoir, et les dépenser pour tirer à nouveau au sort les pièces proposées lorsqu'on ouvre une nouvelle porte.
     
-    Objets permanents :
+    Objets permanents
+    ---------------
     - pelle -> permet de creuser à certains endroits, permettant de trouver certains objets.
     - marteau -> permet de briser les cadenas des coffres, permettant de les ouvrir sans dépenser de clé.
     - kit de crochetage -> permet d'ouvrir certaines portes, sans dépenser de clé.
     - détecteur de métaux -> augmente la chance de trouver des clés et des pi`eces dans le manoir
     - patte de lapin -> augmente la chance de trouver des objets (y compris des objets permanents) dans le manoir
 
-    dataclass pour eviter code repetitif, pour code lisible et code evolutif (facilité ajout/suppresion attributs)
+    dataclass pour eviter code répétitif, pour code lisible et code evolutif (facilité ajout/suppresion attributs)
     
     """
 
@@ -74,7 +75,8 @@ class Inventaire :
 
 
     def utiliser_pas (self, n : int = 1) -> None :
-        """ Utilsie n pas
+        """ 
+        Utilise n pas
         
         Parametres 
         ----------
@@ -84,8 +86,8 @@ class Inventaire :
         Returns
         -------
         None
-        
         """
+
         self.pas = max(0, self.pas - max(0,n))
 
     def ramasser_pas(self, n : int) :
@@ -202,6 +204,17 @@ class Inventaire :
         return self.cles > 0
 
     def ouvrir_casier(self, dry_run : bool = False) -> bool :
+        """
+        Test ouverture d'un casier
+
+        Paramètres
+        ----------
+        dry_run : bool, optional
+            Vérifie si l'ouverture est possible. Par défault à False. 
+
+        Returns:
+            bool: ouverture possible ou non
+        """
         if self.cles <= 0:
             return False
         if not dry_run:

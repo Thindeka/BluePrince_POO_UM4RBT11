@@ -12,10 +12,86 @@ from src.Piece2 import FORME_T_ONE, OPPOSE
 class Game:
     """
     Représente la logique principale du jeu.
+
+    Attributs
+    ---------
+    grille : Grille
+        Instance de la grille du jeu.
+    joueur : Joueur
+        Instance du joueur.
+    inv : Inventaire
+        Inventaire du joueur.
+    pioche_pieces : Pioche2
+        Instance de la pioche de pièces.
+    state : str
+        État actuel du jeu (exploration, tirage, victoire, game_over, achat).
+    tour : int
+        Compteur de tours.
+    last_message : str
+        Dernier message à afficher à l'écran.
+    boosts_pioche_par_couleur : Dict[CouleurPiece, int]
+        Boosts de pioche par couleur.
+    boosts_loot : Dict[str, int]
+        Ressources lootées.
+    ressources_grille : Dict[tuple[int,int], Dict[str,int]]
+        Ressources présentes sur la grille.
+    tirage_en_cours : Optional[Dict[str, Any]]
+        Détails du tirage en cours.
+    contexte_achat : Optional[Dict[str, Any]]
+        Contexte d'achat en cours.
+    contexte_special : Optional[Dict[str, Any]]
+        Contexte spécial de la pièce courante.
+    game_over_selection : int
+        Sélection pour l'écran de fin de partie.
+    rejouer_options : List[str]
+        Options pour rejouer ou quitter.
+
+    Méthodes
+    --------
+    __init__() :
+        Initialise la partie, la grille, le joueur, la pioche et les états.
+    _verifier_conditions_fin()
+        Vérifie conditions de fin de partie (épuisement, blocage, sortie).
+    handle_deplacement(dx, dy)
+        Gère le déplacement du joueur en mode exploration.
+    handle_choix_tirage(mvt) 
+        Change la sélection lors d'un tirage de pièces.
+    handle_confirmation_tirage() 
+        Valide et applique la pièce choisie lors d'un tirage.
+    handle_ouvrir_sur_piece_courante()
+        Ouvre un coffre/casier/point à creuser s'il existe un contexte spécial.
+    handle_re_tirage()
+        Relance le tirage (consomme un dé).
+    handle_confirmation_magasin() 
+        Valide l'achat sélectionné en magasin.
+    utiliser_objet(objet_nom)
+        Utilise un objet consommable de l'inventaire.
+    ouvrir_coffre(coffre) 
+        Ouvre un coffre (délègue à l'objet Coffre).
+    ouvrir_casier(casier) 
+        Ouvre un casier (délègue à l'objet Casier).
+    creuser_endroit(endroit) 
+        Creuse un endroit (délègue à EndroitCreuser).
+    statut() 
+        Retourne un résumé utile pour le debug.
+    entree_magasin(piece) 
+        Prépare le contexte d'achat lors de l'entrée dans une pièce magasin.
+    handle_navigation_magasin(delta) 
+        Navigue entre les offres du magasin.
+    handle_quitter_magasin() 
+        Quitte le mode achat et revient en exploration.
+    _direction_vect(dx, dy) 
+        Convertit un vecteur (dx,dy) en direction (N/S/E/O).
+    handle_navigation_game_over(dx) 
+        Déplace le curseur sur l'écran de Game Over.
+    handle_confirmation_game_over() 
+        Valide le choix sur l'écran de Game Over (rejouer/quitter).
+    _diagnostic_blocage() 
+        Affiche des informations de debug pour expliquer un blocage.
     """
 
     def __init__(self):
-        
+
         self.grille = Grille()
         self.joueur = Joueur()
         self.inv = self.joueur.inventaire
@@ -63,7 +139,19 @@ class Game:
         self.rejouer_options = ["Oui", "Non"]
 
     def _verifier_conditions_fin(self):
-        # Vérifie si le joueur a plus de pas
+
+        """
+        Vérifie si le joueur a plus de pas
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            Message, Etat du jeu
+        """
+
         if self.inv.pas <= 0:
             self.state = "game_over"
             self.last_message = "Vous n'avez plus de pas — partie terminée."
@@ -91,6 +179,15 @@ class Game:
     def handle_deplacement(self, dx : int, dy : int) -> None : # gestion globale du moove du jouer / différent de def dans classe grille qui gère les aspects spatiaux 
         """
         Déplace le joueur dans une direction donnée.
+
+        Paramètres
+        ----------
+            dx (int): Déplacement en x (-1, 0, 1).
+            dy (int): Déplacement en y (-1, 0, 1).
+
+        Returns
+        -------
+            None
         """
        
         if self.state != "exploration" :
@@ -137,18 +234,43 @@ class Game:
         self._verifier_conditions_fin()  
 
     def handle_choix_tirage (self, mvt : int) -> None :
+        """
+        Gère le déplacement du curseur de sélection durant le tirage.
+        Si l'état courant n'est pas "tirage" ou s'il n'existe pas de tirage en cours, la méthode ne modifie rien.
+        Le paramètre mvt est ajouté à l'index courant de la liste des pièces et l'index est normalisé
+        par un opérateur modulo pour rester dans les bornes valides.
+
+        Paramètres
+        ----------
+            mvt (int): incrément du curseur (positif pour avancer, négatif pour reculer)
+
+        Returns
+        -------
+            None
+        """
 
         if self.state != "tirage" or not self.tirage_en_cours :
             return  
         
         pieces = self.tirage_en_cours["pieces"]
         index = self.tirage_en_cours["index"]
-        index = (index + mvt) % len(pieces) # modulo pour rester bien dan sles bornes
+        index = (index + mvt) % len(pieces) # modulo pour rester bien dans les bornes
         self.tirage_en_cours["index"] = index 
 
 
     def handle_confirmation_tirage (self) -> None :
-        
+        """
+        Valide le choix de pièce lors d'un tirage et l'applique à la grille.
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            None
+        """
+
         message = ""
         if self.state != "tirage" or not self.tirage_en_cours :
             return  
@@ -181,10 +303,20 @@ class Game:
 
 
     def handle_ouvrir_sur_piece_courante(self):
+        
         """
         Appelé par l'UI quand le joueur appuie sur 'O' en exploration.
         On regarde si la pièce courante avait laissé un contexte spécial.
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            None
         """
+
         if self.state != "exploration":
             return
 
@@ -231,7 +363,18 @@ class Game:
 
     
     def handle_re_tirage (self) -> None :
-        # avec un dé on peut relancer le tirage des pieces
+        """
+        Relancer le tirage des pièces avec un dé.
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            None
+        """
+
         message = "" 
         
         if self.state != "tirage" or not self.tirage_en_cours :
@@ -255,6 +398,17 @@ class Game:
 
 
     def handle_confirmation_magasin(self) -> None:
+        """
+        Valide l'achat sélectionné en magasin.
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            None
+        """        
 
         if self.state != "achat" or not self.contexte_achat:
             return
@@ -284,7 +438,18 @@ class Game:
         self.handle_quitter_magasin()
 
 
-    def utiliser_objet(self, objet_nom: str):  # interaction avec les objets 
+    def utiliser_objet(self, objet_nom: str):
+        """
+        Interaction avec les objets 
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            None
+        """        
    
         for obj in self.inv.autres_objets:
             if obj.nom == objet_nom:

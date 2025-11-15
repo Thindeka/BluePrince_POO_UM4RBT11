@@ -15,6 +15,40 @@ OFFSET_Y = 120
 
 
 class Renderer:
+    """
+    Classe Renderer pour gérer l'affichage du jeu.
+    
+    Attributs
+    ---------
+    font_title : pygame.font.Font
+        Police pour les titres.
+    font : pygame.font.Font
+        Police pour le texte standard.
+    small : pygame.font.Font
+        Police pour le texte petit.
+    images_cache : dict[tuple[str, int], pygame.Surface]
+        Cache d'images pour éviter de recharger les images à chaque frame.
+    dir_images : str
+        Répertoire contenant les images des pièces.
+    
+    Méthodes
+    -------
+    render -> None
+        Point d'entrée pour dessiner l'écran de jeu.
+    render_hud -> None
+        Dessine le HUD en haut de l'écran.
+    render_grille -> None 
+        Dessine la grille de jeu et les éléments.
+    render_ecran_tirage -> None  
+        Affiche l'écran de tirage des pièces.
+    render_magasin -> None 
+        Affiche l'interface du magasin.
+    render_game_over -> None  
+        Affiche l'écran de fin de jeu.
+    render_victoire -> None  
+        affiche l'écran de victoire.
+    """
+
     def __init__(self) -> None:
         pygame.font.init()
         self.font_title = pygame.font.SysFont("Arial", 22, bold=True)
@@ -29,6 +63,21 @@ class Renderer:
     # point d'entrée
     # ----------------------------------------------------------
     def render(self, ecran: pygame.Surface, game: "Game") -> None:
+        """
+        Point d'entrée pour dessiner l'écran de jeu.
+
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner le jeu.
+        game : Game
+            Instance du jeu
+
+        Returns
+        -------
+        None
+        """
+
         # fond global
         ecran.fill((10, 10, 15))
 
@@ -51,14 +100,26 @@ class Renderer:
    
     def render_hud(self, ecran: pygame.Surface, game: "Game") -> None:
         """
-        Affiche de HUD en haut : 
+        Affiche le HUD en haut : 
             - stats de base (pas/or/gemmes/clés/dés)
             - objets permanents (liste de noms) si présente
             - autres objets consommables (listes d'objets avec.nom) si présente
             - pièce actuelle + état du jeu 
             - message temporaire game.last_message (si défini)
         On utilise getattr pour être tolérant si l'inventaire n'expose pas exactement les mêmes attributs
+        
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner le HUD.
+        game : Game
+            Instance du jeu.
+        
+        Returns
+        -------
+        None
         """
+
         inv = game.inv
         x, y = game.joueur.position
         piece = game.grille.get_piece(x, y)
@@ -135,6 +196,21 @@ class Renderer:
             ecran.blit(self.small.render(game.last_message, True, (255, 255, 200)), (400, 80))  
 
     def render_grille(self, ecran: pygame.Surface, game: "Game") -> None:
+        """
+        Dessine la grille de jeu et les éléments.
+
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        game : Game
+            Instance du jeu.
+
+        Returns
+        -------
+        None
+        """
+
         grille = game.grille
         sortie_x, sortie_y = grille.sortie 
 
@@ -170,6 +246,18 @@ class Renderer:
     def _render_entrance(self, ecran: pygame.Surface, px: int, py: int) -> None:
         """
         Dessine l'antichambre, même si la grille n'a pas encore de pièce ici.
+
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        px : int
+        py : int
+            Représentent les coordonnées pixel (ou écran) calculées à partir des coordonnées grille (gx, gy)
+
+        Returns
+        -------
+        None
         """
         filename = "Entrance.png"
         path = os.path.join(self.dir_images, filename)
@@ -190,7 +278,20 @@ class Renderer:
     def _render_antechamber(self, ecran: pygame.Surface, px: int, py: int) -> None:
         """
         Dessine l'antichambre, même si la grille n'a pas encore de pièce ici.
+
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        px : int
+        py : int
+            Représentent les coordonnées pixel (ou écran) calculées à partir des coordonnées grille (gx, gy)
+
+        Returns
+        -------
+        None
         """
+
         filename = "Antechamber.png"
         path = os.path.join(self.dir_images, filename)
 
@@ -208,6 +309,22 @@ class Renderer:
 
 
     def _render_piece_image(self, ecran: pygame.Surface, piece, px: int, py: int) -> None:
+        """
+        Appliquer les images
+
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        px : int
+        py : int
+            Représentent les coordonnées pixel (ou écran) calculées à partir des coordonnées grille (gx, gy)
+
+        Returns
+        -------
+        None
+        """
+
         filename = piece.nom.replace(" ", "_") + ".png"
         path = os.path.join(self.dir_images, filename)
 
@@ -226,6 +343,25 @@ class Renderer:
 
 
     def _render_portes_case(self, ecran, px, py, cell, portes: dict) -> None:
+        """
+
+
+        Paramètres
+        ----------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        px : int
+        py : int
+            Représentent les coordonnées pixel (ou écran) calculées à partir des coordonnées grille (gx, gy)
+        cell : _type_
+
+        portes : dict
+        
+        Returns
+        -------
+        None
+
+        """
         # épaisseur
         th = 5
         for d, porte in portes.items():
@@ -262,6 +398,21 @@ class Renderer:
                     ecran.blit(txt, (px + 2, py + cell // 2 - 6))
 
     def render_ecran_tirage(self, ecran: pygame.Surface, game: "Game") -> None:
+        """
+        Ecran pop-up du tirage des pièces
+
+        paramètres
+        ---------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        game : Game
+            Instance du jeu
+
+        Returns
+        -------
+        None
+        """
+
         data = game.tirage_en_cours
         # sécurité
         if not data:
@@ -305,6 +456,21 @@ class Renderer:
         ecran.blit(aide, (w // 2 - aide.get_width() // 2, center_y + 90))
 
     def render_magasin(self, ecran: pygame.Surface, game: "Game") -> None:
+        """
+        Ecran pop-up du magasin (shop)
+
+        paramètres
+        ---------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        game : Game
+            Instance du jeu
+
+        Returns
+        -------
+        None
+        """
+
         ctx = game.contexte_achat
         if not ctx:
             return
@@ -362,7 +528,7 @@ class Renderer:
 
         # aide
         aide = self.small.render(
-            "Entrée / O : acheter    Échap : quitter   <- / ->  ou ZQSD : changer d'article",
+            "Entrée / O : acheter    Échap : quitter   <- / ->  ou QD : changer d'article",
             True,
             (230, 230, 230),
         )
@@ -373,7 +539,20 @@ class Renderer:
         """
         Affiche un écran 'Game Over' avec une capsule et le choix Rejouer Oui / Non.
         selection : 0 = Oui, 1 = Non
+
+        paramètres
+        ---------
+        ecran : pygame.Surface
+            Surface pygame où dessiner la grille.
+        game : Game
+            Instance du jeu
+        selection : int (0 par défaut)
+
+        Returns
+        -------
+        None
         """
+        
         w, h = ecran.get_size()
 
         # Fond semi-transparent noir
