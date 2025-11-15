@@ -137,7 +137,22 @@ class Pioche2 :
         pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_ANGLE_NE, cout_gemmes=2, rarete=2))
         pieces.append(Piece2("Rotunda", CouleurPiece.BLEU, FORME_ANGLE_ON, cout_gemmes=2, rarete=2))
 
+        # Den
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_NES))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ESO))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_SON))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
+        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
         
+
 
         # ----------------- PIECESS VERTES -----------------
 

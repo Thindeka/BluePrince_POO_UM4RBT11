@@ -203,6 +203,8 @@ class Game:
                 self.contexte_special = None
             else:
                 # pas de clé => on peut garder le contexte pour réessayer plus tard
+                message = "Vous n'avez pas de clé pour ouvrir ce casier."
+                self.last_message = message
                 pass
 
         # coffre
@@ -211,6 +213,10 @@ class Game:
                 obj = random.choice([Pomme(), Banane(), Gateau(), Sandwich(), Repas()])
                 obj.appliquer(self.inv)
                 self.contexte_special = None
+            else:
+                message = "Vous n'avez pas de clé ni de marteau pour ouvrir ce coffre."
+                self.last_message = message
+                pass
 
         # endroit à creuser
         elif kind == "creuser":
@@ -218,6 +224,10 @@ class Game:
                 obj = random.choice([Pomme(), Banane(), Gateau()])
                 obj.appliquer(self.inv)
                 self.contexte_special = None
+            else:
+                message = "Vous n'avez pas de pelle pour creuser."
+                self.last_message = message
+                pass
 
     
     def handle_re_tirage (self) -> None :

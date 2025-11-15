@@ -247,6 +247,16 @@ class Piece2 :
             self.recompense_prise = True
             return
 
+        if "den" in nom or "foyer" in nom:
+            # on ne l'ouvre pas automatiquement  c'est au joueur d'appuyer sur O
+            # donc on indique juste au game qu'on est sur un coffre
+            game.contexte_special = {"type": "coffre", "piece": self}
+            if hasattr(self, "contenu"):
+                if "Coffre" not in self.contenu:
+                    self.contenu.append("Coffre")
+            self.recompense_prise = True
+            return
+        
         if "shop" in nom or "store" in nom or "magasin" in nom:
             game.state = "shop"
             game.contexte_achat = {

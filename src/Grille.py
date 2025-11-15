@@ -92,8 +92,10 @@ class Grille :
         y = max(0, min(self.__hauteur - 1, y))  # on s'assure qu y est dans les bornes
         
         if y == self.__hauteur - 1 :   # rangée du bas
+            print("niveau_porte: y bas", y, "-> 0")
             return 0
         if y == 0 : # rangée du haut
+            print("niveau_porte: y haut", y, "-> 2")
             return 2 
         
         hauteur_norm = (self.__hauteur - 1 - y) / (self.__hauteur - 1)
@@ -101,8 +103,9 @@ class Grille :
         p0 = max(0.5 - 0.5 * hauteur_norm, 0.1)  # probabilité niveau 0 etccc
         p1 = 0.3
         p2 = 1 - p0 - p1
-
-        return random.choices([0, 1, 2], weights=[p0, p1, p2])[0]
+        choix = random.choices([0, 1, 2], weights=[p0, p1, p2])[0]
+        print(f"niveau_porte: y={y}, hauteur_norm={hauteur_norm:.3f}, p=[{p0:.3f},{p1:.3f},{p2:.3f}] -> {choix}")
+        return choix
 
 
 
@@ -125,7 +128,8 @@ class Grille :
         # 3) Création de la porte (x,y) si non existante
         if direction not in portes_case_courante :   # la porte n'existe pas
             if niveau is None :
-                niveau = self.niveau_porte(min(y, new_y))
+                niveau = self.niveau_porte(new_y)
+            print(f"[garantie_porte] création porte en {(x,y)} dir={direction} -> niveau={niveau}")
             portes_case_courante[direction] = Porte(niveau=niveau, ouverte=False)
             
         # 4) on fait de même du côté opposé
@@ -135,7 +139,8 @@ class Grille :
                 niveau = portes_case_courante[direction].niveau, 
                 ouverte = portes_case_courante[direction].ouverte
             )
-
+        
+        print(f"ouverte : {portes_case_courante[direction].ouverte}") # ouverture : vrai automatiquement quand on se déplace vers une porte,pourquoi ?
         return portes_case_courante[direction]
 
 
@@ -170,8 +175,9 @@ class Grille :
         # porte séparant (x,y) et (new_x, new_y)
         porte = self.garantie_porte(x, y, d)
 
+
         if not porte.ouverte :    # porte fermee
-            
+            print("porte fermée, tentative d'ouverture...")
             if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
                 print(f"Porte niveau {porte.niveau} NON OUVERTE (pos {(x,y)} -> {(new_x,new_y)})") 
                 message = "Vous ne pouvez pas ouvrir cette porte (ressource manquante)."
