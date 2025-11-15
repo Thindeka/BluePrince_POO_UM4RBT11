@@ -97,6 +97,7 @@ class Piece2 :
         ###
         self.contenu: list[str] = []
         self.recompense_prise : bool = False  
+        self.or_dans_piece = int = 0
 
 
     def a_porte (self, direction : str) -> bool :

@@ -89,10 +89,28 @@ class Pioche2 :
         pieces.append(Piece2("Parlor", CouleurPiece.BLEU, FORME_ANGLE_ON))
 
         # Office
+        office_so = Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_SO)
+        office_es = Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_ES)
+        office_ne = Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_NE)
+        office_on = Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_ON)
+        for o in (office_so, office_es, office_ne, office_on):
+            o.or_dans_piece = 3  # tu peux ajuster (2, 3, 5, etc.)
+            pieces.append(o)
+        """  
         pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_SO))
         pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_ES))
         pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_NE))
         pieces.append(Piece2("Office", CouleurPiece.BLEU, FORME_ANGLE_ON))
+        """ 
+
+         # Vault : beaucoup d'or
+        vault_s = Piece2("Vault", CouleurPiece.BLEU, FORME_IMPASSE_S, cout_gemmes=2, rarete=3)
+        vault_n = Piece2("Vault", CouleurPiece.BLEU, FORME_IMPASSE_N, cout_gemmes=2, rarete=3)
+        vault_e = Piece2("Vault", CouleurPiece.BLEU, FORME_IMPASSE_E, cout_gemmes=2, rarete=3)
+        vault_o = Piece2("Vault", CouleurPiece.BLEU, FORME_IMPASSE_O, cout_gemmes=2, rarete=3)
+        for v in (vault_s, vault_n, vault_e, vault_o):
+            v.or_dans_piece = 40  
+            pieces.append(v)
 
         # Chamber of Mirrors
         pieces.append(Piece2("Chamber of Mirrors", CouleurPiece.BLEU, FORME_IMPASSE_S, cout_gemmes=2, rarete=2))
@@ -207,6 +225,7 @@ class Pioche2 :
         pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_ES))
         pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_NE))
         pieces.append(Piece2("Kitchen", CouleurPiece.JAUNE, FORME_ANGLE_ON))
+
 
         return pieces
             
