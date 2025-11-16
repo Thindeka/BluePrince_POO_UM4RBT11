@@ -2,10 +2,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, Set, Optional
-import random
-
 from src.AutreObjet import AutreObjet, Banane, Gateau, Pomme, Repas, Sandwich
 from src.ObjetPermanent import DetecteurMetaux, KitCrochetage, Marteau, ObjetPermanent, PatteLapin, Pelle
+from src.directions import OPPOSITE, voisin
+import random
+
 
 
 if TYPE_CHECKING:
@@ -15,8 +16,8 @@ if TYPE_CHECKING:
     from src.Porte import Porte
     
 
+
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
-DIRECTIONS_REVERSE = {(0,-1):"N",(0,1):"S",(1,0):"E",(-1,0):"O"}
 OPPOSE = {"N" : "S", "S" : "N", "E" : "O", "O" : "E"}
 
 
@@ -28,6 +29,7 @@ class CouleurPiece(Enum) :
     ORANGE = auto()
     ROUGE = auto()
     BLEU = auto()
+
 
 
 class FormePiece :
@@ -56,6 +58,8 @@ class FormePiece :
     def a_porte (self, direction : str) -> bool :
         return direction in self.ens_portes
     
+
+
 
 # FORMES DE PIECE
 
@@ -88,7 +92,9 @@ FORME_T_SON = FormePiece("t_son", {"S", "O", "N"})
 FORME_T_ONE = FormePiece("t_one", {"O", "N", "E"})
 
 
-class Piece2 :
+
+
+class Piece :
     """
     Représente les pièces du jeu.
 
@@ -145,17 +151,19 @@ class Piece2 :
         self.forme = forme
         self.cout_gemmes = cout_gemmes
         self.rarete = rarete
-        ###
         self.tags = tags or []
-        ###
         self.contenu: list[str] = []
         self.recompense_prise : bool = False  
-        self.or_dans_piece = int = 0
+        self.or_dans_piece : int = 0
+
+
 
 
     def a_porte (self, direction : str) -> bool :
         return self.forme.a_porte(direction)
     
+
+
 
     def peut_etre_posee (self, grille : 'Grille', x : int, y : int, dir_entree : str) -> bool :
         """
@@ -183,9 +191,15 @@ class Piece2 :
             -> chaque porte de la piece doit etre dans les bornes
             -> si un voisin existe avec une porte vers la case actuelle, il faut avoir la porte de retour
         """
-
+    
         # entree bloquee
-        if dir_entree not in DIRECTIONS or not self.a_porte(dir_entree) :
+        #if dir_entree not in DIRECTIONS or not self.a_porte(dir_entree) :
+            #return False
+
+        if dir_entree not in DIRECTIONS:
+            return False
+        
+        if dir_entree not in self.forme.ens_portes:
             return False
         
         # hors bornes
@@ -194,7 +208,7 @@ class Piece2 :
             if not grille.deplacement_permis(new_x, new_y) :
                 return False
             
-        
+
         for d in DIRECTIONS :
             new_x, new_y = grille.voisin(x, y, d)  # case voisinne dans direction demandée
             # ignorer ce voisin car il est hors bornes
@@ -204,15 +218,17 @@ class Piece2 :
 
             voisin = grille.get_piece(new_x, new_y)
             if voisin is None :
-                continue ########### à completer comportement plus tard par grille.piece_at()
+                continue
 
-            if isinstance(voisin, Piece2) :
+            if isinstance(voisin, Piece) :
                 if voisin.a_porte(OPPOSE[d]) :
                     if not self.a_porte(d) :
                         return False # car c est incoherent si le voisin a une porte vers la case courante masi que la case courant en a pas de porte vers le voisin
         
         return True
-    
+        
+
+
 
     def poser_piece (self, grille : 'Grille', x : int, y : int) -> None :
         """ 
@@ -257,6 +273,8 @@ class Piece2 :
             porte_retour.set_niveau(0)
 
 
+
+
     
     def effet_entree (self, game : 'Game') :
         """
@@ -293,16 +311,21 @@ class Piece2 :
 
         if self.recompense_prise : 
             return
+        
+        if "corridor" in nom :
+            inv.ramasser_cles(1)
+            inv.ramasser_pieceOr(2)
+            self.recompense_prise = True
+            
 
-        if "bedroom" in nom or "chambre" in nom:
+        if "bedroom" in nom :
             # regagner des pas
-            inv.ramasser_pas(3)
+            inv.ramasser_pas(5)
             self.recompense_prise = True
             return
 
-        if "chapel" in nom or "chapelle" in nom:
-            # un peu d'or, c'est un lieu "positif" 
-            inv.ramasser_pieceOr(2) ### pièce rouge avec normalement effet indésirable
+        if "chapel" in nom :
+            inv.depenser_pieceOr(1)
             self.recompense_prise = True
             return
 
@@ -312,12 +335,12 @@ class Piece2 :
             inv.ramasser_pieceOr(2)
 
             # parfois un objet consommable de 2.2
-            if random.random() < 0.4:
+            if random.random() < 0.5:
                 obj = random.choice([Pomme(), Banane(), Gateau(), Sandwich(), Repas()])
                 obj.appliquer(inv)
 
             # parfois un objet permanent
-            if random.random() < 0.12:
+            if random.random() < 0.3:
                 candidats = [
                     Pelle(),
                     Marteau(),
@@ -329,7 +352,6 @@ class Piece2 :
                 if candidats:
                     inv.ajouter_obj_permanent(random.choice(candidats))
 
-            # on peut aussi noter son contenu pour l'affichage
             if hasattr(self, "contenu"):
                 if "Endroit à creuser" not in self.contenu:
                     self.contenu.append("Endroit à creuser")
@@ -337,9 +359,10 @@ class Piece2 :
             self.recompense_prise = True
             return
         
-        if "locker" in nom or "vestiaire" in nom:
+        if "locker" in nom :
             # on ne l'ouvre pas automatiquement  c'est au joueur d'appuyer sur O
             # donc on indique juste au game qu'on est sur un casier
+            inv.ramasser_cles(5)
             game.contexte_special = {"type": "casier", "piece": self}
             if hasattr(self, "contenu"):
                 if "Casier" not in self.contenu:
@@ -347,7 +370,7 @@ class Piece2 :
             self.recompense_prise = True
             return
 
-        if "den" in nom or "foyer" in nom:
+        if "den" in nom:
             # on ne l'ouvre pas automatiquement  c'est au joueur d'appuyer sur O
             # donc on indique juste au game qu'on est sur un coffre
             game.contexte_special = {"type": "coffre", "piece": self}
@@ -356,31 +379,26 @@ class Piece2 :
                     self.contenu.append("Coffre")
             self.recompense_prise = True
             return
-        
-        if "shop" in nom or "store" in nom or "magasin" in nom:
-            game.state = "shop"
-            game.contexte_achat = {
-                "piece": self,
-                "offres": [             ### défini aussi dans la fonction entree_magasin de la classe Game, en double ??
-                    ("Clé", 3, "cle"),
-                    ("Dé", 4, "de"),
-                    ("Pelle", 6, "pelle"),
-                ],
-            }
+
+        if "security" in nom or "guard room" in nom:
+            inv.ramasser_cles(5)
+            inv.ramasser_pieceOr(3)  
             self.recompense_prise = True
             return
         
-        if "furnace" in nom or "fournaise" in nom or "trap" in nom:
+        
+        if "furnace" in nom  in nom:
             inv.utiliser_pas(1)
             self.recompense_prise = True
             return
         
         # MAID'S CHAMBER  boost + gemme (une fois)
-        if "maid" in nom:
+        if "maidschamber" in nom:
             inv.chance_objets = max(inv.chance_objets, 0.7)
             inv.ramasser_gemmes(1)
             self.recompense_prise = True
             return
+        
     
 
         # MASTER BEDROOM 
@@ -389,6 +407,12 @@ class Piece2 :
             self.recompense_prise = True
             return
         
+        if "gallery" in nom :
+            r = random.randint(1,3)
+            inv.ramasser_gemmes(r)
+            self.recompense_prise = True
+
+
         # PATIO , gemme + dépôt autour (mais une seule fois)
         if "patio" in nom:
             inv.ramasser_gemmes(1)
@@ -402,14 +426,15 @@ class Piece2 :
             self.recompense_prise = True
             return
         
-        # OFFICE
-        if "office" in nom:
+        # OFFICE - dépose or dans cases voisinnes
+        if "office" in nom :
             for d, (dx, dy) in {"N": (0,-1), "S": (0,1), "E": (1,0), "O": (-1,0)}.items():
                 nx, ny = x + dx, y + dy
                 if game.grille.deplacement_permis(nx, ny):
                     game.ressources_grille.setdefault((nx, ny), {})
                     game.ressources_grille[(nx, ny)]["or"] = \
                         game.ressources_grille[(nx, ny)].get("or", 0) + 2
+            inv.ramasser_cles(1)
             self.recompense_prise = True
             return
         
@@ -421,15 +446,30 @@ class Piece2 :
             self.recompense_prise = True
             return
 
-        # POOL : soin une fois
+        # POOL 
         if "pool" in nom:
             inv.ramasser_pas(4)
             self.recompense_prise = True
+            return  
+    
+        if "nursery" in nom:
+            inv.ramasser_pas(5)
+            self.recompense_prise = True
             return
-
-
+        
+        if "vault" in nom:
+            if getattr(self, "or_dans_piece", 0) > 0:
+                inv.ramasser_pieceOr(self.or_dans_piece)
+                self.or_dans_piece = 0
+            self.recompense_prise = True
+            return
+    
         return
         
+
+
+
+
     def effet_tirage (self, game : 'Game') -> None :
         """
         Appelé juste après avoir choisi cette pièce dans l'écran de tirage.
@@ -442,12 +482,8 @@ class Piece2 :
         if "master bedroom" in nom:
             inv.ramasser_pas(4) ### ca se répète avec l'effet d'entrée ?
 
-        # Weight Room : retire des pas tout de suite
-        if "weight room" in nom or "salle de sport" in nom:
-            inv.utiliser_pas(2)
-
         # Furnace : rend plus probable le rouge après
-        if "furnace" in nom or "fournaise" in nom:
+        if "furnace" in nom:
             game.boosts_pioche_par_couleur[self.couleur.__class__.ROUGE] += 1
 
         # Greenhouse : booste le vert
@@ -463,6 +499,7 @@ class Piece2 :
         if "chamber of mirrors" in nom or "chambre des miroirs" in nom:
             game.pioche_pieces.ajouter_piece_modele("couloir_NS")
             game.pioche_pieces.ajouter_piece_modele("couloir_EO")
+
 
 
 
@@ -486,6 +523,9 @@ class Piece2 :
             game.ressources_grille.setdefault((nx, ny), {})
             game.ressources_grille[(nx, ny)]["or"] = game.ressources_grille[(nx, ny)].get("or", 0) + 1
 
+
+
+
     # Effet de modif de proba de tirage 
     def effet_modif_pioche(self, game :'Game') -> None:
         """
@@ -498,6 +538,9 @@ class Piece2 :
         if "boost_rouge" in self.tags:
             game.boosts_pioche_par_couleur[self.couleur.__class__.ROUGE] += 1
 
+
+
+
     #  Effet de modif de proba d'objets 
     def effet_modif_objets(self, game : 'Game') -> None:
         """
@@ -509,6 +552,9 @@ class Piece2 :
             game.boosts_loot["obj_perm"] += 1
         if "boost_cles" in self.tags:
             game.boosts_loot["cles"] += 1
+
+
+
 
     # Effet d'ajout au catalogue (Chamber of Mirrors, Pool) 
     def effet_ajout_catalogue(self, game : 'Game') -> None:

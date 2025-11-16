@@ -1,13 +1,16 @@
 from src.Grille import Grille
 from src.Joueur import Joueur
-from src.Piece import Piece2, CouleurPiece, FORME_CROIX
-from src.Pioche import Pioche2
+from src.Piece import Piece, CouleurPiece, FORME_CROIX
+from src.Pioche import Pioche
 from src.AutreObjet import Coffre, Casier, EndroitCreuser
 from typing import Dict, Optional, Any
 import random
 from src.AutreObjet import AutreObjet, Banane, Gateau, Pomme, Repas, Sandwich
 from src.ObjetPermanent import DetecteurMetaux, KitCrochetage, Marteau, ObjetPermanent, PatteLapin, Pelle
 from src.Piece import FORME_T_ONE, OPPOSE
+
+
+
 
 class Game:
     """
@@ -21,7 +24,7 @@ class Game:
         Instance du joueur.
     inv : Inventaire
         Inventaire du joueur.
-    pioche_pieces : Pioche2
+    pioche_pieces : Pioche
         Instance de la pioche de pièces.
     state : str
         État actuel du jeu (exploration, tirage, victoire, game_over, achat).
@@ -95,7 +98,7 @@ class Game:
         self.grille = Grille()
         self.joueur = Joueur()
         self.inv = self.joueur.inventaire
-        self.pioche_pieces = Pioche2()
+        self.pioche_pieces = Pioche()
         self.state : str = "exploration"  # autres états : "tirage", "victoire", "game_over", "achat"
         self.tour = 0  # compteur de tours
         self.last_message = "" # dernier message temporaire à afficher à l'écran
@@ -123,7 +126,7 @@ class Game:
             self.joueur.position = (x0, y0)
 
         if self.grille.get_piece(x0,y0) is None :
-            piece_a_placer = Piece2("Entrance", CouleurPiece.BLEU, FORME_T_ONE)
+            piece_a_placer = Piece("Entrance", CouleurPiece.BLEU, FORME_T_ONE)
             self.grille.placer_piece(x0, y0, piece_a_placer)
 
 
@@ -138,43 +141,8 @@ class Game:
         self.game_over_selection = 0  # 0 = Oui, 1 = Non
         self.rejouer_options = ["Oui", "Non"]
 
-    def _verifier_conditions_fin(self):
+    
 
-        """
-        Vérifie si le joueur a plus de pas
-
-        Paramètres
-        ----------
-            None
-
-        Returns
-        -------
-            Message, Etat du jeu
-        """
-
-        if self.inv.pas <= 0:
-            self.state = "game_over"
-            self.last_message = "Vous n'avez plus de pas — partie terminée."
-            return
-
-        # Vérifie si le joueur est bloqué
-        x, y = self.joueur.position
-        blocked = True
-        for dx, dy in [(0,-1),(0,1),(1,0),(-1,0)]:
-            nx, ny = x+dx, y+dy
-            if self.grille.deplacement_permis(nx, ny):
-                blocked = False
-                break
-        if blocked:
-            self.last_message = "Vous êtes entouré(e) — partie terminée."
-            self.state = "game_over"
-            return
-
-        # Vérifie si le joueur atteint la sortie
-        if self.joueur.position == self.grille.sortie:
-            self.state = "victoire"
-            self.last_message = "Félicitations ! Vous avez trouvé la sortie."
-            return
 
     def handle_deplacement(self, dx : int, dy : int) -> None : # gestion globale du moove du jouer / différent de def dans classe grille qui gère les aspects spatiaux 
         """
@@ -197,7 +165,8 @@ class Game:
 
         if message:
             self.last_message = message
-            return message
+            #return message
+            return 
     
         if deplacement :
             if pas_consommes :
@@ -213,6 +182,11 @@ class Game:
             x, y = self.joueur.position
             new_x = x + dx
             new_y = y + dy
+
+            if (new_x, new_y) == self.grille.sortie :
+                self._verifier_conditions_fin()
+                return
+            
             dir_entree = OPPOSE[self._direction_vect(dx, dy)]
 
             pieces = self.pioche_pieces.tirage_3_pieces(self.grille, new_x, new_y, dir_entree, boosts=self.boosts_pioche_par_couleur)
@@ -232,6 +206,9 @@ class Game:
             return 
 
         self._verifier_conditions_fin()  
+
+
+
 
     def handle_choix_tirage (self, mvt : int) -> None :
         """
@@ -258,6 +235,8 @@ class Game:
         self.tirage_en_cours["index"] = index 
 
 
+
+
     def handle_confirmation_tirage (self) -> None :
         """
         Valide le choix de pièce lors d'un tirage et l'applique à la grille.
@@ -276,7 +255,7 @@ class Game:
             return  
         
         cible_x, cible_y = self.tirage_en_cours["cible"]
-        piece : Piece2 = self.tirage_en_cours['pieces'][self.tirage_en_cours["index"]]
+        piece : Piece = self.tirage_en_cours['pieces'][self.tirage_en_cours["index"]]
 
         # gestion des gemmes 
         if piece.cout_gemmes > 0 :
@@ -300,6 +279,8 @@ class Game:
 
         self.tirage_en_cours = None # fin phase tirage
         self.state = "exploration"
+
+
 
 
     def handle_ouvrir_sur_piece_courante(self):
@@ -362,6 +343,8 @@ class Game:
                 pass
 
     
+
+
     def handle_re_tirage (self) -> None :
         """
         Relancer le tirage des pièces avec un dé.
@@ -397,6 +380,8 @@ class Game:
         self.tirage_en_cours["index"] = 0
 
 
+
+
     def handle_confirmation_magasin(self) -> None:
         """
         Valide l'achat sélectionné en magasin.
@@ -421,21 +406,56 @@ class Game:
             self.last_message = "Vous n'avez pas assez de pièces d'or pour cet achat."
             return
 
-        # appliquer l'achat
-        if code == "cle":
-            self.inv.ramasser_cles(1)
-            self.last_message = "vous avez acheté une clé."
-        elif code == "de":
-            self.inv.ramasser_des(1)
-            self.last_message = "vous avez acheté un dé."
-        elif code == "pomme":
+        # kitchen
+        if code == "pomme" :
             Pomme().appliquer(self.inv)
             self.last_message = "vous avez acheté une pomme (+2 pas)."
+        
+        elif code == "banane" :
+            Banane().appliquer(self.inv)
+            self.last_message = "vous avez acheté une banane (+3 pas)."
+
+        elif code == "gateau" :
+            Gateau().appliquer(self.inv)
+            self.last_message = "vous avez acheté un gateau (+10 pas)."
+
+        elif code == "sandwich" :
+            Sandwich().appliquer(self.inv)
+            self.last_message = "vous avez acheté un sandwich (+15 pas)."
+
+        elif code == "repas" :
+            Repas().appliquer(self.inv)
+            self.last_message = "vous avez acheté un repas (+25 pas)."
+        
+        # comisssariat
         elif code == "pelle":
             self.inv.ajouter_obj_permanent(Pelle())
             self.last_message = "vous avez acheté une pelle."
 
+        elif code == "marteau":
+            self.inv.ajouter_obj_permanent(Marteau())
+            self.last_message = "vous avez acheté un marteau."
+        
+        # cles + kit crochetage + dés
+        elif code == "kit_crochetage":
+            self.inv.ajouter_obj_permanent(KitCrochetage())
+            self.last_message = "vous avez acheté un marteau."
+
+        elif code == "cle" :
+            self.inv.ramasser_cles(1)
+            self.last_message = "vous avez acheté une clé."
+
+        elif code == "cle5" :
+            self.inv.ramasser_cles(5)
+            self.last_message = "vous avez acheté 5 clés."
+
+        elif code == "des" :
+            self.inv.ramasser_des(2)
+            self.last_message = "vous avez acheté 2 dés."
+
         self.handle_quitter_magasin()
+
+
 
 
     def utiliser_objet(self, objet_nom: str):
@@ -459,17 +479,28 @@ class Game:
         return "Objet non trouvé dans l'inventaire."
 
 
+
+
     def ouvrir_coffre(self, coffre: Coffre):
         """Ouvre un coffre avec objets aléatoires."""
         return coffre.ouvrir(self.inv)
+
+
+
 
     def ouvrir_casier(self, casier: Casier):
         """Ouvre un casier avec objets aléatoires."""
         return casier.ouvrir_casier(self.inv)
 
+
+
+
     def creuser_endroit(self, endroit: EndroitCreuser):
         """Creuse un endroit avec objets aléatoires."""
         return endroit.creuser(self.inv)
+
+
+
 
     def statut(self):   # statut du jeu
         """
@@ -485,18 +516,46 @@ class Game:
             f"Dés : {self.inv.des}"
         )
     
-    def entree_magasin(self, piece) -> None:
+
+
+
+    def entree_magasin(self, piece : Piece) -> None:
         """
         Appelé quand on entre dans une pièce jaune.
         On prépare les offres et on passe en état 'achat'.
         """
-        # offres à diversifier
-        offres = [
-            ("Clé", 3, "cle"),
-            ("Dé", 4, "de"),
-            ("Pomme", 1, "pomme"),
-            ("Pelle (permanent)", 6, "pelle"),
-        ]
+        nom = piece.nom.lower()
+
+        if "kitchen" in nom :
+            offres = [
+            ("Pomme",1, "pomme"),
+            ("Banane",1, "banane"),
+            ("Gâteau", 2, "gateau"),
+            ("Sandwich",2, "sandwich"),
+            ("Repas", 3, "repas"),
+            ]
+
+        elif "commissary" in nom :
+            offres = [
+                ("Pelle (permanente)", 5, "pelle"),
+                ("Marteau (permanent)", 5, "marteau"),
+                ("Kit de crochetage", 4, "kit_crochetage"),
+                ("2 Dés", 1, "des")
+            ]
+
+        elif "locksmith" in nom :
+            offres = [
+                ("Clé",1, "cle"),
+                ("5 clés",3, "cle5"),
+                ("Kit de crochetage", 5, "kit_crochetage"),
+            ]
+        
+        else:
+            offres = [
+                ("Clé", 3, "cle"),
+                ("Pomme", 1, "pomme"),
+                ("Pelle (permanente)", 6, "pelle"),
+            ]
 
         self.contexte_achat = {
             "piece": piece,
@@ -506,6 +565,8 @@ class Game:
         self.state = "achat"
 
     
+
+
     def handle_navigation_magasin (self, delta: int) -> None:
         """
         delta = -1 (gauche) ou 1 (droite)
@@ -517,9 +578,14 @@ class Game:
         i = (i + delta) % len(offres)
         self.contexte_achat["index"] = i
 
+
+
+
     def handle_quitter_magasin (self) -> None :
         self.contexte_achat = None
         self.state = "exploration"
+
+
 
 
     def _direction_vect (self, dx : int, dy : int) :
@@ -531,20 +597,28 @@ class Game:
         }
         return correspondances[(dx, dy)]
 
+
+
+
     def handle_navigation_game_over(self, dx: int) -> None:
         """
-        Déplacement du curseur sur l’écran de Game Over (Oui / Non)
+        Déplacement du curseur sur l'écran de Game Over (Oui / Non)
         """
-        if self.state != "game_over":
+        if self.state != "game_over" :
             return
-
+        
+        if dx == 0:
+            return 
+        
         # -1 = gauche / +1 = droite
         self.game_over_selection = (self.game_over_selection + (1 if dx > 0 else -1)) % len(self.rejouer_options)
 
 
+
+
     def handle_confirmation_game_over(self) -> None:
         """
-        Valide le choix sur l’écran de Game Over.
+        Valide le choix sur l'écran de Game Over.
         """
         if self.state != "game_over":
             return
@@ -558,7 +632,10 @@ class Game:
         else:
             # Quitter le jeu proprement
             self.state = "quit"
-            self.last_message = "Merci d’avoir joué !"
+            self.last_message = "Merci d'avoir joué !"
+
+
+
             
     def _diagnostic_blocage(self):
         """
@@ -590,16 +667,31 @@ class Game:
             print(f" | deplacement_permis: {perm}")
         print("=== FIN DIAGNOSTIC ===")
 
+
+
+
     def _verifier_conditions_fin(self) -> None :
+        """
+        Vérifie confitions de fin de jeu
+
+        Paramètres
+        ----------
+            None
+
+        Returns
+        -------
+            Message, Etat du jeu
+        """
         if self.inv.pas <= 0 :
             self.state = "game_over"
             self.last_message = "Vous êtes épuisée... plus de pas disponibles !"
-        
+            self.game_over_selection = 0
             return 
+        
         if self.joueur.position == self.grille.sortie :
             self.state = "victoire"
             self.last_message = "Bravo ! Vous avez trouvé la sortie !"
-        
+            self.game_over_selection = 0
             return 
 
         # 3. Vérifier si le joueur est bloqué (aucun déplacement possible)
@@ -616,8 +708,8 @@ class Game:
                 # En cas d'erreur, on considère la case non praticable
                 print(f"Erreur déplacement ({nx},{ny}) : {e}")
 
-        # 4. Si bloqué → afficher message et fin de partie
-        if blocked:
+        # 4. Si bloqué  afficher message et fin de partie
+        if blocked :
             self.last_message = "Vous êtes complètement bloqué(e) — partie terminée."
             print("=== DIAGNOSTIC BLOCAGE ===")
             print(f"Position joueur : {self.joueur.position}")

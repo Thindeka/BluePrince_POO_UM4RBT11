@@ -54,9 +54,10 @@ class Inventaire :
 
 
     ####### AUTRES OBJETS
-    
     noms_autres_objets : Set[str] = field(default_factory=set)        # noms des autres objets 
     autres_objets : List['AutreObjet'] = field(default_factory=list)    # instances des autres objets 
+
+
 
 
     def enregistrer_possession_obj_perm (self, obj_perm : 'ObjetPermanent') -> bool :
@@ -90,13 +91,21 @@ class Inventaire :
 
         self.pas = max(0, self.pas - max(0,n))
 
+
+
+
     def ramasser_pas(self, n : int) :
         self.pas += max(0,n)   # on évite le comportement indésirables de faire un ajout avec un nombre négatif
+
+
 
 
     def ramasser_pieceOr (self, n : int) -> None :
         self.piecesOr += max(0,n)  # on évite le comportement indésirables de faire un ajout avec un nombre négatif
     
+
+
+
     def depenser_pieceOr(self, montant: int) -> bool:
         """Dépenser 'montant' pièces d'or. Retourne True si dépense possible et réalisée, sinon False."""
         if montant <= 0:
@@ -111,6 +120,9 @@ class Inventaire :
     def ramasser_gemmes (self, n : int) -> None :
         self.gemmes += max(0,n) 
 
+
+
+
     def depenser_gemmes (self, n : int) -> bool :
         if self.gemmes >= n and n >= 0 :
             self.gemmes -= max(0,n)
@@ -119,8 +131,12 @@ class Inventaire :
     
 
 
+
     def ramasser_cles (self, n : int) -> None :
         self.cles += max(0,n)  
+
+
+
 
     def depenser_cles (self, n : int = 1) -> bool :
         n = max (0,n)
@@ -131,14 +147,19 @@ class Inventaire :
     
 
 
+
     def ramasser_des (self, n) -> None :
         self.des += max(0,n)  
+
+
+
 
     def depenser_des (self, n) -> bool :
         if self.des > 0 :
             self.des -= 1
             return True
         return False
+
 
 
  
@@ -154,6 +175,8 @@ class Inventaire :
         if hasattr(obj_perm, "appliquer"):
             obj_perm.appliquer(self)
 
+
+
     
     def possede_obj_permanent (self, nom : str) -> bool :
         """ Retourne vrai si l'inventaire possède l'objet permanent en paramètre"""
@@ -161,10 +184,14 @@ class Inventaire :
     
 
 
+
     #### GESTION OUVERTURE PORTE
     def peut_ouvrir_porte(self, niveau: int) -> bool:
         return self.ouvrir_porte(niveau, dry_run=True)
     
+
+
+
 
     def ouvrir_porte (self, niveau : int, dry_run : bool = False) -> bool :   # dry_run pour l'UI
         """ dry_run permet de pre-verifier action sans la comettre """
@@ -188,10 +215,15 @@ class Inventaire :
         return False
     
 
+
+
     ####### GESTION CREUSER
     def peut_creuser (self) -> bool :
         return self.creuser(dry_run=True)
     
+
+
+
     def creuser (self, dry_run : bool = False) -> bool :
         if self.possede_obj_permanent("pelle") :
             return True 
@@ -203,6 +235,9 @@ class Inventaire :
     ####### GESTION OUVERTURE CASIER
     def peut_ouvrir_casier (self) -> bool :
         return self.cles > 0
+
+
+
 
     def ouvrir_casier(self, dry_run : bool = False) -> bool :
         """
@@ -221,6 +256,9 @@ class Inventaire :
         if not dry_run:
             self.cles -= 1
         return True
+
+
+
 
     ####### GESTION OUVERTURE COFFRE
     def ouvrir_coffre(self, dry_run: bool = False) -> bool :

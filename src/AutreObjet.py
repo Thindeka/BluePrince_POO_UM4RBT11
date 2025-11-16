@@ -1,13 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional
 import random
+from abc import ABC, abstractmethod
 
 if TYPE_CHECKING:
     from src.Inventaire import Inventaire
 
 
 
-class AutreObjet :
+class AutreObjet(ABC) :
     """
     Classe de base pour tous les objets utilisables dans le jeu.
 
@@ -18,6 +19,7 @@ class AutreObjet :
     """
     nom : str = "autre_obj"  # attribut de classe, valeur par défaut
 
+    @abstractmethod
     def appliquer (self, inv : 'Inventaire') :  
         raise NotImplementedError
 
@@ -240,7 +242,7 @@ class Casier:
 
 
 
-class EndroitCreuser:
+class EndroitCreuser :
     """
     Représente un endroit où le joueur peut creuser pour trouver des objets.
     Paramètres

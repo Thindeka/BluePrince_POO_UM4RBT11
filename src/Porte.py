@@ -1,4 +1,5 @@
 class Porte :
+    
     """ Represente une porte du manoir
     
     Attributs

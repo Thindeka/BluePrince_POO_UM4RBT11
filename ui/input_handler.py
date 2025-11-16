@@ -4,7 +4,7 @@
 import pygame
 
 # correspondance touche avec les vecteurs de deplacement
-TOUCHE_DEPLACEMENT = {   # enlever fleches si nécéssaire
+TOUCHE_DEPLACEMENT = {  
     pygame.K_UP:    (0, -1),
     pygame.K_DOWN:  (0,  1),
     pygame.K_LEFT:  (-1, 0),
@@ -72,10 +72,15 @@ class InputHandler :
 
             
             elif event.type == pygame.KEYDOWN :  # touche a été pressée
+                
                 touche = event.key
 
                 if touche == pygame.K_ESCAPE:  # sortir
                     intentions['annuler'] = True
+
+                elif touche in (pygame.K_LEFT, pygame.K_RIGHT):
+                    intentions['nav_game_over'] = -1 if touche == pygame.K_LEFT else 1
+                    intentions['deplacer'] = TOUCHE_DEPLACEMENT.get(touche)
 
                 elif touche in TOUCHE_DEPLACEMENT :  # deplacement
                     intentions['deplacer'] = TOUCHE_DEPLACEMENT[touche]
@@ -92,8 +97,6 @@ class InputHandler :
 
                 elif touche == pygame.K_c:   # creuser ('C')
                     intentions['creuser'] = True
-
-                
 
         return intentions
         

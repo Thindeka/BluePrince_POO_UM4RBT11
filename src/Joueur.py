@@ -8,6 +8,9 @@ if TYPE_CHECKING :
 
 DIRECTIONS = {"N" : (0,-1), "S" : (0,1), "E" : (1,0), "O" : (-1,0)}  # on suit la convention des interfaces graphiques de cmettre l'origine en haut à gauche 
 
+
+
+
 class Joueur:
     """
     Représente le joueur ou la joueuse.
@@ -25,6 +28,7 @@ class Joueur:
     
 
 
+
     def deplacer_str(self, direction : str, grille : 'Grille'):
         """
         Déplace le joueur dans la direction donnée si le déplacement est permis.
@@ -34,7 +38,7 @@ class Joueur:
         direction : str
             Direction du déplacement ('N', 'S', 'E' ou 'O').
         grille : objet Grille
-            Représente la grille du jeu contenant la méthode `deplacement_permis(x, y)`.
+            Représente la grille du jeu contenant la méthode deplacement_permis(x, y).
 
         Returns
         -------
@@ -57,6 +61,7 @@ class Joueur:
             return True
         return False
     
+
 
 
     def deplacer_coords(self, direction : Tuple[int,int], grille : 'Grille'):
@@ -86,6 +91,7 @@ class Joueur:
     
 
 
+
     def ramasser_objet(self, objet):
         """
         Ramasse un objet et applique ses effets à l'inventaire.
@@ -93,7 +99,7 @@ class Joueur:
         Paramètres
         ----------
         objet : objet
-            L’objet à ramasser, contenant une méthode `appliquer(inventaire)`.
+            L'objet à ramasser, contenant une méthode `appliquer(inventaire)`.
 
         Returns
         -------

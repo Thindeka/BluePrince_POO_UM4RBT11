@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from src.Joueur import Joueur
     from src.Inventaire import Inventaire  # si tu l’annotes aussi
     from src.Porte import Porte
-    from src.Piece import Piece2
+    from src.Piece import Piece
 
 
 
@@ -36,7 +36,7 @@ class Grille :
     ---------
     __largeur : int
     __hauteur : int
-    __pieces : list[list[Piece2 | None]]
+    __pieces : list[list[Piece | None]]
         Matrice des pièces indexée par [y][x].
     __portes : Dict[Tuple[int,int], Dict[str, Porte]]
         Portes par case et direction.
@@ -49,7 +49,7 @@ class Grille :
         Propriétés d'accès.
     placer_piece(x, y, piece) -> None 
         Place une pièce aux coordonnées données.
-    get_piece(x, y) -> Piece2 | None 
+    get_piece(x, y) -> Piece | None 
         Retourne la pièce à (x,y) ou None.
     deplacement_permis(x, y) -> bool
         Indique si (x,y) est dans les bornes.
@@ -80,35 +80,45 @@ class Grille :
         self.sortie = (2, 0)  # (x, y) => x=2, y=0
 
 
+
     @property
     def largeur (self) :
         """ getter de l'attribut __largeur """
         return self.__largeur
     
+
+
     @property
     def hauteur (self) :
         """ getter de l'attribut __hauteur """
         return self.__hauteur
     
+
+
     @property
     def pieces (self) :
         return self.__pieces
     
+
+
     @property
     def portes (self) :
         """ getter de l'attribut __portes """
         return self.__portes
     
+
+
     def placer_piece (self, x : int, y : int , piece) -> None :
         """ setter porte aux coords donnees """
         self.__pieces[y][x] = piece
 
-    def get_piece (self, x : int, y : int) -> Piece2 | None :
+
+
+    def get_piece (self, x : int, y : int) -> Piece | None :
         return self.__pieces[y][x]
 
     
 
-    #### FOCNTIONS AUXILIAIRES
 
     def deplacement_permis (self, x : int, y : int) -> bool :
         """ 
@@ -116,6 +126,8 @@ class Grille :
         """
         return 0 <= x < self.__largeur and 0 <= y < self.__hauteur
     
+
+
 
     def dict_portes (self, x : int, y : int) -> Dict[str, 'Porte'] :
         """ 
@@ -125,11 +137,15 @@ class Grille :
         return self.portes.setdefault((x,y), {})
 
 
+
+
     def voisin (self, x : int, y : int, direction : str) -> Tuple[int, int] :
         """ Renvoie la case voisine dans la direction demandéee"""
         dx, dy = DIRECTIONS[direction]
         return x + dx, y + dy
        
+
+
 
     def niveau_porte(self, y : int) -> int :
         """
@@ -168,6 +184,7 @@ class Grille :
         choix = random.choices([0, 1, 2], weights=[p0, p1, p2])[0]
         print(f"niveau_porte: y={y}, hauteur_norm={hauteur_norm:.3f}, p=[{p0:.3f},{p1:.3f},{p2:.3f}] -> {choix}")
         return choix
+
 
 
 
@@ -222,6 +239,8 @@ class Grille :
         
         print(f"ouverte : {portes_case_courante[direction].ouverte}") # ouverture : vrai automatiquement quand on se déplace vers une porte,pourquoi ?
         return portes_case_courante[direction]
+
+
 
 
 
@@ -298,6 +317,8 @@ class Grille :
             return True, False, 1, message  # porte ouverte et si piece existe => deplacement
         
         return False, True, 0, message  # porte ouverte mais pas de piece => tirage 
+
+
 
 
     def objets_a_position(self, x, y):

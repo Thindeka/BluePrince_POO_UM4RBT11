@@ -4,6 +4,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.Inventaire import Inventaire
 
+
+
+
 class ObjetPermanent :
     """
     Objet permanent
@@ -31,10 +34,13 @@ class Pelle (ObjetPermanent) :
     pass
 
 
+
+
 class Marteau (ObjetPermanent) :
     """ Permet de briser les cadenas des coffres, permettant de les ouvrir sans dépenser de clé """
     nom = "marteau"
     pass
+
 
 
 
@@ -45,12 +51,14 @@ class KitCrochetage (ObjetPermanent) :
 
 
 
+
 class DetecteurMetaux (ObjetPermanent) :
     """ Augmente la chance de trouver des clés et des pièces dans le manoir"""
     nom = "detecteur_metaux"
     def _appliquer_effets(self, inv : 'Inventaire') -> None:
         inv.chance_cles += 0.10  # faire cas où top 100%
         inv.chance_piecesOr += 0.10  # faire cas où top 100%
+
 
 
 
