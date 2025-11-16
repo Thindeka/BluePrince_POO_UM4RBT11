@@ -168,16 +168,6 @@ class Pioche2 :
         pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ESO))
         pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_SON))
         pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-        pieces.append(Piece2("Den", CouleurPiece.BLEU, FORME_T_ONE))
-
 
 
         # ----------------- PIECESS VERTES -----------------
@@ -233,10 +223,10 @@ class Pioche2 :
         # ----------------- PIECESS ORANGES -----------------
         
         # Hallway
-        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_EO))
-        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_EO)) # afin de garder des chances de tirage équivalents aux autres pièces
-        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_NS))
-        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_COULOIR_NS)) # afin de garder des chances de tirage équivalents aux autres pièces
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_T_NES))
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_T_ESO))
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_T_SON))
+        pieces.append(Piece2("Hallway", CouleurPiece.ORANGE, FORME_T_ONE))
 
         # Passageway
         pieces.append(Piece2("Passageway", CouleurPiece.ORANGE, FORME_CROIX))
@@ -371,7 +361,7 @@ class Pioche2 :
 
         return tirage
     
-
+ 
     def ajouter_piece_modele(self, modele: str | Piece2) -> None:
         """
         Ajoute un modèle dans la pioche.
@@ -404,7 +394,7 @@ class Pioche2 :
         nom_lower = nom.lower()
 
         if nom_lower in ("couloir_ns", "couloir-ns", "ns"):
-            p = Piece2("Dynamic Corridor NS", CouleurPiece.ORANGE, FORME_COULOIR_NS)
+            p = Piece2("Couloir NS", CouleurPiece.ORANGE, FORME_COULOIR_NS)
         elif nom_lower in ("couloir_eo", "couloir-eo", "eo", "couloir"):
             p = Piece2("Dynamic Corridor EO", CouleurPiece.ORANGE, FORME_COULOIR_EO)
         elif nom_lower in ("carre", "square", "room"):
