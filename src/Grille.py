@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from src.Joueur import Joueur
     from src.Inventaire import Inventaire  # si tu l’annotes aussi
     from src.Porte import Porte
-    from src.Piece2 import Piece2
+    from src.Piece import Piece2
 
 
 
@@ -148,14 +148,19 @@ class Grille :
          
         y = max(0, min(self.__hauteur - 1, y))  # on s'assure qu y est dans les bornes
         
-        if y == self.__hauteur - 1 :   # rangée du bas
+        if y == self.__hauteur - 1  or y == self.__hauteur - 2 :   # deux premieres rangées du bas
             print("niveau_porte: y bas", y, "-> 0")
             return 0
         if y == 0 : # rangée du haut
             print("niveau_porte: y haut", y, "-> 2")
             return 2 
         
-        hauteur_norm = (self.__hauteur - 1 - y) / (self.__hauteur - 1)
+        limite = self.__hauteur // 2  # moité pour éviter porttes de niveau 2 dans la moité du bas de la grille
+        
+        if y >= limite :
+            return random.choices([0, 1], weights=[0.65, 0.35])[0]  # 65% niv 0, %35 niv 1
+
+        hauteur_norm = (limite - y) / max(1, limite - 1)
         
         p0 = max(0.5 - 0.5 * hauteur_norm, 0.1)  # probabilité niveau 0 etccc
         p1 = 0.3
@@ -273,9 +278,9 @@ class Grille :
 
 
         if not porte.ouverte :    # porte fermee
-            print("porte fermée, tentative d'ouverture...")
+            print(f"[ouvrir_porte] niveau={porte.niveau}, cles={inventaire.cles}, kit={inventaire.possede_obj_permanent('kit_crochetage')}")
             if not inventaire.ouvrir_porte(porte.niveau) :  # porte ne peut pas etre ouverte
-                print(f"Porte niveau {porte.niveau} NON OUVERTE (pos {(x,y)} -> {(new_x,new_y)})") 
+                #print(f"Porte niveau {porte.niveau} NON OUVERTE (pos {(x,y)} -> {(new_x,new_y)})") 
                 message = "Vous ne pouvez pas ouvrir cette porte (ressource manquante)."
                 return False, False, 0, message
             else:

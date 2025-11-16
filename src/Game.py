@@ -1,13 +1,13 @@
 from src.Grille import Grille
 from src.Joueur import Joueur
-from src.Piece2 import Piece2, CouleurPiece, FORME_CROIX
-from src.Pioche2 import Pioche2
+from src.Piece import Piece2, CouleurPiece, FORME_CROIX
+from src.Pioche import Pioche2
 from src.AutreObjet import Coffre, Casier, EndroitCreuser
 from typing import Dict, Optional, Any
 import random
 from src.AutreObjet import AutreObjet, Banane, Gateau, Pomme, Repas, Sandwich
 from src.ObjetPermanent import DetecteurMetaux, KitCrochetage, Marteau, ObjetPermanent, PatteLapin, Pelle
-from src.Piece2 import FORME_T_ONE, OPPOSE
+from src.Piece import FORME_T_ONE, OPPOSE
 
 class Game:
     """

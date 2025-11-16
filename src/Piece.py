@@ -236,7 +236,7 @@ class Piece2 :
         
         for d in self.forme.ens_portes :
             porte = grille.garantie_porte(x, y, d)
-            porte.ouverte = True
+            #porte.ouverte = True
             new_x, new_y = grille.voisin(x, y, d)
 
             if not grille.deplacement_permis(new_x, new_y) :

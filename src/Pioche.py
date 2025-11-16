@@ -2,7 +2,7 @@ from __future__ import annotations
 import random
 from typing import List, Optional, Dict, TYPE_CHECKING
 
-from src.Piece2 import (
+from src.Piece import (
     Piece2,
     FORME_COULOIR_EO,
     FORME_COULOIR_NS,

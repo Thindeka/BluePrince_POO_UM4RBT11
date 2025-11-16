@@ -168,6 +168,7 @@ class Inventaire :
 
     def ouvrir_porte (self, niveau : int, dry_run : bool = False) -> bool :   # dry_run pour l'UI
         """ dry_run permet de pre-verifier action sans la comettre """
+        print(f"[ouvrir_porte] niveau={niveau}, cles={self.cles}, kit={self.possede_obj_permanent('kit_crochetage')}, dry_run={dry_run}")
         if niveau == 0:
             return True
         if niveau == 1:

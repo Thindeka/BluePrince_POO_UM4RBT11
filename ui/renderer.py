@@ -308,6 +308,23 @@ class Renderer:
             ecran.blit(self.small.render("ENTRACNCE", True, (0, 0, 0)), (px + 4, py + 4))
 
 
+    def _get_piece_image(self, nom_piece: str, size: int) -> pygame.Surface | None :
+
+        filename = nom_piece.replace(" ", "_") + ".png"
+        path = os.path.join(self.dir_images, filename)
+
+        if not os.path.exists(path):
+            return None
+
+        key = (filename, size)
+        if key not in self.images_cache:
+            img = pygame.image.load(path).convert_alpha()
+            if img.get_width() != size or img.get_height() != size:
+                img = pygame.transform.smoothscale(img, (size, size))
+            self.images_cache[key] = img
+        return self.images_cache[key]
+
+
     def _render_piece_image(self, ecran: pygame.Surface, piece, px: int, py: int) -> None:
         """
         Appliquer les images
@@ -324,22 +341,15 @@ class Renderer:
         -------
         None
         """
-
-        filename = piece.nom.replace(" ", "_") + ".png"
-        path = os.path.join(self.dir_images, filename)
-
-        if os.path.exists(path):
-            key = (filename, CELL)
-            if key not in self.images_cache:
-                img = pygame.image.load(path).convert_alpha()
-                img = pygame.transform.smoothscale(img, (CELL, CELL))
-                self.images_cache[key] = img
-            ecran.blit(self.images_cache[key], (px, py))
+        img = self._get_piece_image(piece.nom, CELL)
+        if img is not None:
+            ecran.blit(img, (px, py))
         else:
-            # fallback si pas d’image
+            # affichage par défaut
             pygame.draw.rect(ecran, (210, 210, 210), (px + 2, py + 2, CELL - 4, CELL - 4))
             short = piece.nom[:12]
             ecran.blit(self.small.render(short, True, (0, 0, 0)), (px + 4, py + 4))
+
 
 
     def _render_portes_case(self, ecran, px, py, cell, portes: dict) -> None:
@@ -363,18 +373,21 @@ class Renderer:
 
         """
         # épaisseur
-        th = 5
+        th = 1
         for d, porte in portes.items():
             # couleur selon état
             if porte.ouverte:
                 col = (0, 220, 0)  # vert
+        
+            if porte.ouverte:
+                col = (0, 200, 0)  # vert = ouvert
             else:
                 if porte.niveau == 0:
-                    col = (240, 240, 0)   # jaune
+                    col = (128, 128, 128)  # gris = porte niveau 0 pas encore utilisee
                 elif porte.niveau == 1:
-                    col = (255, 140, 0)   # orange
-                else:
-                    col = (220, 0, 0)     # rouge
+                    col = (255, 165, 0)  # orange = nécessite clé ou crochetage
+                elif porte.niveau == 2:
+                    col = (255, 0, 0)  # rouge = verrou ultime
 
             if d == "N":
                 pygame.draw.rect(ecran, col, (px + 8, py, cell - 16, th))
@@ -417,43 +430,81 @@ class Renderer:
         # sécurité
         if not data:
             return
-
+        
         pieces = data["pieces"]
         index = data["index"]
 
-        # overlay sombre
-        surf = pygame.Surface(ecran.get_size(), pygame.SRCALPHA)
-        surf.fill((0, 0, 0, 160))
-        ecran.blit(surf, (0, 0))
+        grille = game.grille
+        grid_right = OFFSET_X + grille.largeur * CELL
+        panel_x = grid_right + 20
+        panel_y = OFFSET_Y
+        panel_w = ecran.get_width() - panel_x - 20
+        panel_h = ecran.get_height() - panel_y - 20
 
-        w, h = ecran.get_size()
-        center_y = h // 2
-        center_x = w // 2
+        # fond + titre 
+        pygame.draw.rect(ecran, (8, 8, 10), (panel_x, panel_y, panel_w, panel_h))
+        pygame.draw.rect(ecran, (220, 220, 220), (panel_x, panel_y, panel_w, panel_h), 2)
+        titre = self.font.render("Tirage des pièces", True, (255, 255, 255))
+        ecran.blit(titre, (panel_x + 16, panel_y + 12))
 
-        # on dessine les 3 choix
-        spacing = 200
-        base_x = center_x - spacing
+        # Zone pioche
+        cards_y = panel_y + 50
+        cards_h = panel_h - 100
+
+        # pieces
+        nb = len(pieces)
+        if nb == 0:
+            return
+
+        espacement = 10
+        w_piece = (panel_w - (nb + 1) * espacement) // nb
+        h_piece = min(160, cards_h)
+
         for i, piece in enumerate(pieces):
-            px = base_x + i * spacing
-            py = center_y - 100
-            rect = pygame.Rect(px, py, 150, 150)
+            cx = panel_x + espacement + i * (w_piece + espacement)
+            cy = cards_y
 
-            # fond
+            rect = pygame.Rect(cx, cy, w_piece, h_piece)
+
+            # couleur fond
             col = (90, 90, 120) if i != index else (160, 160, 220)
             pygame.draw.rect(ecran, col, rect, border_radius=8)
             pygame.draw.rect(ecran, (255, 255, 255), rect, 2, border_radius=8)
 
             # nom
-            ecran.blit(self.font.render(piece.nom, True, (10, 10, 10)), (px + 8, py + 8))
+            nom = piece.nom
+            surf_nom = self.font.render(nom, True, (10, 10, 10))
+            ecran.blit(surf_nom, (cx + 8, cy + 8))
 
-            # coût gemmes
-            if getattr(piece, "cout_gemmes", 0) > 0:
-                cg = piece.cout_gemmes
-                ecran.blit(self.small.render(f"Coût: {cg} gemme(s)", True, (0, 0, 0)), (px + 8, py + 35))
+            # coût en gemmes
+            cg = getattr(piece, "cout_gemmes", 0)
+            text_offset_y = 8
+            if cg > 0:
+                txt_cg = self.small.render(f"Coût : {cg} gemme(s)", True, (0, 0, 0))
+                ecran.blit(txt_cg, (cx + 8, cy + 35))
+                text_offset_y = 50  # décallage au cas de texte
 
-        # aide
-        aide = self.small.render("<- / -> pour choisir   Entrée pour valider   Espace pour relancer (si dé)", True, (255, 255, 255))
-        ecran.blit(aide, (w // 2 - aide.get_width() // 2, center_y + 90))
+            img_size = min(w_piece - 20, h_piece - 70)
+            img = self._get_piece_image(piece.nom, img_size)
+            if img is not None:
+                ix = cx + (w_piece - img_size) // 2
+                iy = cy + text_offset_y
+                ecran.blit(img, (ix, iy))
+
+            # couleur de la pièce (BLEU, VERT, etc.)
+            try:
+                col_nom = piece.couleur.name
+            except Exception:
+                col_nom = str(piece.couleur)
+            surf_col = self.small.render(col_nom, True, (0, 0, 0))
+            ecran.blit(surf_col, (cx + 8, cy + h_piece - 24))
+
+        # aide en bas du panneau
+        aide_txt = "<- / -> pour choisir   Entrée pour valider   Espace pour relancer (si dé)"
+        aide = self.small.render(aide_txt, True, (230, 230, 230))
+        ecran.blit(aide, (panel_x + 16, panel_y + panel_h - 30))
+
+
 
     def render_magasin(self, ecran: pygame.Surface, game: "Game") -> None:
         """
@@ -480,18 +531,20 @@ class Renderer:
         index = ctx.get("index", 0)
 
         # panneau
-        panel_w = 520
-        panel_h = 280
-        x = (ecran.get_width() - panel_w) // 2
-        y = (ecran.get_height() - panel_h) // 2
+        grid_droite = OFFSET_X + game.grille.largeur * CELL
 
-        pygame.draw.rect(ecran, (15, 15, 15), (x, y, panel_w, panel_h))
-        pygame.draw.rect(ecran, (220, 220, 220), (x, y, panel_w, panel_h), 2)
+        panneau_x = grid_droite + 20
+        panneau_y = OFFSET_Y
+        panneau_w = ecran.get_width() - panneau_x - 20
+        panneau_h = ecran.get_height() - panneau_y - 20
+    
+        pygame.draw.rect(ecran, (15, 15, 15), (panneau_x, panneau_y, panneau_w, panneau_h))
+        pygame.draw.rect(ecran, (220, 220, 220), (panneau_x, panneau_y, panneau_w, panneau_h), 2)
 
         # titre
         nom_piece = ctx.get("piece").nom if ctx.get("piece") else "Magasin"
         titre = self.font.render(f"Magasin : {nom_piece}", True, (255, 255, 255))
-        ecran.blit(titre, (x + 16, y + 12))
+        ecran.blit(titre, (panneau_x + 16, panneau_y + 12))
 
         # ressources du joueur
         info = self.small.render(
@@ -499,10 +552,10 @@ class Renderer:
             True,
             (230, 230, 230),
         )
-        ecran.blit(info, (x + 16, y + 40))
+        ecran.blit(info, (panneau_x + 16, panneau_y + 40))
 
         # zone des offres
-        list_y = y + 70
+        list_y = panneau_y + 70
         line_h = 34
 
         for i, off in enumerate(offres):
@@ -516,7 +569,7 @@ class Renderer:
                 label, prix, _code = off
 
             # fond sélectionné
-            rect = pygame.Rect(x + 12, list_y + i * line_h, panel_w - 24, line_h - 4)
+            rect = pygame.Rect(panneau_x + 12, list_y + i * line_h, panneau_w - 24, line_h - 4)
             if i == index:
                 pygame.draw.rect(ecran, (130, 140, 50), rect)
             else:
@@ -532,7 +585,7 @@ class Renderer:
             True,
             (230, 230, 230),
         )
-        ecran.blit(aide, (x + 16, y + panel_h - 30))
+        ecran.blit(aide, (panneau_x + 16, panneau_y + panneau_h - 30))
 
 
     def render_game_over(self, ecran: pygame.Surface, selection: int = 0) -> None:
